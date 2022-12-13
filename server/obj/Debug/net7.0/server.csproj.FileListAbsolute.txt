@@ -1,0 +1,15 @@
+C:\Users\bradl\Desktop\C#\Server-Project-1\server\bin\Debug\net7.0\server.exe
+C:\Users\bradl\Desktop\C#\Server-Project-1\server\bin\Debug\net7.0\server.deps.json
+C:\Users\bradl\Desktop\C#\Server-Project-1\server\bin\Debug\net7.0\server.runtimeconfig.json
+C:\Users\bradl\Desktop\C#\Server-Project-1\server\bin\Debug\net7.0\server.dll
+C:\Users\bradl\Desktop\C#\Server-Project-1\server\bin\Debug\net7.0\server.pdb
+C:\Users\bradl\Desktop\C#\Server-Project-1\server\obj\Debug\net7.0\server.csproj.AssemblyReference.cache
+C:\Users\bradl\Desktop\C#\Server-Project-1\server\obj\Debug\net7.0\server.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\bradl\Desktop\C#\Server-Project-1\server\obj\Debug\net7.0\server.AssemblyInfoInputs.cache
+C:\Users\bradl\Desktop\C#\Server-Project-1\server\obj\Debug\net7.0\server.AssemblyInfo.cs
+C:\Users\bradl\Desktop\C#\Server-Project-1\server\obj\Debug\net7.0\server.csproj.CoreCompileInputs.cache
+C:\Users\bradl\Desktop\C#\Server-Project-1\server\obj\Debug\net7.0\server.dll
+C:\Users\bradl\Desktop\C#\Server-Project-1\server\obj\Debug\net7.0\refint\server.dll
+C:\Users\bradl\Desktop\C#\Server-Project-1\server\obj\Debug\net7.0\server.pdb
+C:\Users\bradl\Desktop\C#\Server-Project-1\server\obj\Debug\net7.0\server.genruntimeconfig.cache
+C:\Users\bradl\Desktop\C#\Server-Project-1\server\obj\Debug\net7.0\ref\server.dll
