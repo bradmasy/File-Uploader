@@ -5,18 +5,14 @@ using System.Net;
 using System.Net.Sockets;
 abstract class BaseThread{
 
-    private Thread _thread;
-    protected Socket _socket;
+    protected Thread _thread;
 
     protected BaseThread()
     {
+        Console.WriteLine("here");
+        _thread = new Thread(new ThreadStart(Run));
     }
 
-    protected BaseThread(Socket sock){
-        _thread = new Thread(new ThreadStart(Run));
-        _socket = sock;
-    }
-    
     public abstract void Run();
     public void Start() {
         
