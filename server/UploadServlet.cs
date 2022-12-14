@@ -1,10 +1,11 @@
-﻿using System.Text;
+﻿using System.Net.Sockets;
+using System.Text;
 
 namespace server;
 
 public class UploadServlet: Servlet
 {
-
+    private TcpClient _client;
     public UploadServlet()
     {
         Console.WriteLine("Creating upload servlet");
@@ -18,8 +19,13 @@ public class UploadServlet: Servlet
         response.WriteToStream(responseStr);
     }
 
+    public void SetClient(TcpClient client) 
+    {
+        _client = client;
+    }
     public void DoPost(Response response, Request request)
     {
-        throw new NotImplementedException();
+        Console.WriteLine(response);
+        response.ReadStream(_client);
     }
 }

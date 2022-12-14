@@ -48,6 +48,7 @@ class ServerThread : BaseThread
         stream.Read(bytes, 0, bytes.Length); // writes to the byte array.
         
         String data       = Encoding.UTF8.GetString(bytes); // the data to string.
+        Console.WriteLine(data);
         Request request   = new Request(data);
         Response response = new Response(stream);
         Servlet servlet;
@@ -57,6 +58,7 @@ class ServerThread : BaseThread
            // Type type = Type.GetType("server.UploadServlet");
 
             servlet = Activator.CreateInstance<UploadServlet>();
+            servlet.SetClient(_client);
         }
         else {
          //   Type type = Type.GetType("ClientServlet");
