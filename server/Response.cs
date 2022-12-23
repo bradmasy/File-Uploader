@@ -15,21 +15,29 @@ public class Response
     public void WriteToStream(Byte[] response)
     {
         _stream.Write(response,0,response.Length);
-        
     }
 
     private void ProcessPayload(String data)
     {
-        Request request = new Request(data);
-        Console.WriteLine(request);
+        //Request request = new Request(data);
+        //Console.WriteLine(request);
+       // PostRequest postRequest = new PostRequest(data);
     }
 
-    public void ReadStream(TcpClient client)
+    private void CloseStream()
     {
-        Byte[] bytes = new Byte[client.Available]; // creates a Byte array the size of whats available.
-        _stream.Read(bytes, 0, bytes.Length);
-        String data = Encoding.UTF8.GetString(bytes);
-        Console.WriteLine(data);
-        ProcessPayload(data);
+        _stream.Close();
     }
+
+   // public void ReadStream(TcpClient client)
+    //{
+     //   Byte[] bytes = new Byte[client.Available]; // creates a Byte array the size of whats available.
+      //  Console.WriteLine("amount of bytes: " + client.Available);
+       // _stream.Read(bytes, 0, bytes.Length);
+      //  String data = Encoding.UTF8.GetString(bytes);
+      //  Console.WriteLine(data);
+       // ProcessPayload(data);
+       // CloseStream();
+        
+   // }
 }

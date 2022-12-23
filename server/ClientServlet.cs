@@ -8,7 +8,7 @@ public class ClientServlet: Servlet
 
     public ClientServlet()
     {
-        
+        _client = new TcpClient();
     }
     
     public void DoGet(Response response, Request request)

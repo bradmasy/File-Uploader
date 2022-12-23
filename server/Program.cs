@@ -10,7 +10,6 @@ class Program
     static void Main(string[] args)
     {
 
-
         TcpListener server = new TcpListener(IPAddress.Parse("127.0.0.1"), 8000);
         
         server.Start();
@@ -22,8 +21,6 @@ class Program
             Console.WriteLine("accepted client");
             ServerThread thread = new ServerThread(client); 
         }
-   
-        Console.WriteLine("leaving...");
-
+        
     }
 }

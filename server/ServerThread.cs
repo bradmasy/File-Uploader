@@ -17,7 +17,7 @@ class ServerThread : BaseThread
         _thread.Start();
     }
 
-    void MakeDecision(Request request, Response response, Servlet servlet)
+    void HandleRequest(Request request, Response response, Servlet servlet)
     {
         switch (request.GetRequestMap()["Request"])
         {
@@ -25,7 +25,10 @@ class ServerThread : BaseThread
                 servlet.DoGet(response, request);
                 break;
             case "Post":
+                Console.WriteLine("HERE");
+                Console.WriteLine("BOUNDARY: " + request.GetBoundary());
                 servlet.DoPost(response,request);
+             //   servlet.DoGet(response,request);
                 break;
             default:
                 Console.WriteLine("Error");
@@ -43,29 +46,27 @@ class ServerThread : BaseThread
             // wait for enough bytes to be available
         }
         
-        Byte[] bytes         = new Byte[_client.Available]; // creates a Byte array the size of whats available.
+        Byte[] bytes      = new Byte[_client.Available]; // creates a Byte array the size of whats available.
         
         stream.Read(bytes, 0, bytes.Length); // writes to the byte array.
         
         String data       = Encoding.UTF8.GetString(bytes); // the data to string.
-        Console.WriteLine(data);
         Request request   = new Request(data);
         Response response = new Response(stream);
+        
         Servlet servlet;
 
         if (request.GetRequestMap()["User-Agent"].Equals("Browser"))
         {
-           // Type type = Type.GetType("server.UploadServlet");
-
             servlet = Activator.CreateInstance<UploadServlet>();
             servlet.SetClient(_client);
         }
         else {
-         //   Type type = Type.GetType("ClientServlet");
             servlet = Activator.CreateInstance<ClientServlet>();
         }
         
-        MakeDecision(request,response,servlet);
+        HandleRequest(request,response,servlet);
+        _client.Close(); // close the client after the request has been processed.
     }
     
     
