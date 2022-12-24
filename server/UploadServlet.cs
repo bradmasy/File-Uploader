@@ -35,11 +35,9 @@ public class UploadServlet: Servlet
     {
        if(request.GetRequestMap() != null && request.GetRequestMap().ContainsKey("Boundary"))
         {
-            //Console.WriteLine("Contains Boundary: " + request.GetRequestMap()["Boundary"]);
             ProcessPostRequest(request);
         }
-        Console.WriteLine("PROCESSING POST REQUEST");
-        Console.WriteLine(request);
-        
+
+        Console.WriteLine("PROCESSING POST REQUEST");        
     }
 }
