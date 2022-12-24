@@ -12,22 +12,28 @@ public class Request
     // public statics.
     public static int OFFSET  = 14;
     public static int MIN_LEN = 1;
-    public const  int CONTENT = 1;
+    public const int CONTENT  = 1;
     public const int CAPTION  = 2;
     public const int DATE     = 3;
     public const int TYPE     = 4;
+    public const int OK       = 200;
+    public const int ERROR    = 404;
+    public const int REDIRECT = 301;
     public const String START = "\n\r";
 
   
     
     // private instance data.
     private Dictionary<String, String> _requestData;
+    private Dictionary<String, String> _multipartData ;
     private String _boundary = "";
     private String _data;
+    private int _status = ERROR;
    
     public Request(String data)
     {
         _data = data;
+        _multipartData = new Dictionary<string, string>();
         _requestData = ParseRequest(data);
     }
 
@@ -41,26 +47,21 @@ public class Request
         return _boundary;
     }
 
+    /**
+     *  Processes each incoming line that represents a line in the request made.
+     */
     private void ProcessLines(String line, Dictionary<String, String> request)
     {
-        Console.WriteLine("LINE: " + line);
         String[] content = line.Split(":");
 
-        Console.WriteLine("CONTENT 0: " + content[0]);
-        if(content.Length > 1)
-        {
-            Console.WriteLine("\tCONTENT 1: " + content[1]);
-
-        }
-        if (content.Length > MIN_LEN)
+        if (content.Length > MIN_LEN) // if there is something to split.
         {
             if (content[0].Equals("User-Agent"))
             {
-                content[1] = "Browser";
+                content[1] = "Browser"; // identify the user agent as browser, we will tweak later.
             }
-            else if(content[0].Equals("Content-Type"))
-            {
-                
+            else if(content[0].Equals("Content-Type")) // to get the boundary.
+            {   
                     String[] splitContent = content[1].Split(";");
                     _boundary = "------" + splitContent[1].Substring(OFFSET);
                     request.Add("Boundary", _boundary);
@@ -71,12 +72,17 @@ public class Request
     }
 
 
-
+    /**
+     * Parses the first part of the multipart data to get the content information.
+     */
     private void ContentData(String line, Dictionary<String,String> d)
     {
-        // adding the name to the dictionary.
 
-        String patternName       = "name=";
+       String[] CONTENT_VALUES = new String[2] { "text/plain", "image/jpeg" };
+
+    // adding the name to the dictionary.
+
+    String patternName       = "name=";
         String patternSeparater  = ";";
         Match m                  = Regex.Match(line,patternName);
         MatchCollection sepMatch = Regex.Matches(line,patternSeparater);
@@ -86,19 +92,36 @@ public class Request
         String quoteSeparator    = "\"";
         MatchCollection quotes   = Regex.Matches(line, quoteSeparator);
         String value             = line.Substring( (m1.Index + patternFile.Length +1), (quotes[3].Index - m1.Index - patternFile.Length-1)  );
-
+    
         d.Add(key, value);
 
-        // adding the content to the dictionary.
+        // adding the content type.
 
-        //String end = "\n\r";
+        String contentType = "";
+      
+        for(int i = 0; i < CONTENT_VALUES.Length; i++)
+        {
+            String each = CONTENT_VALUES[i];
+
+            if (Regex.IsMatch(line,each))
+            {
+                contentType = CONTENT_VALUES[i];
+                break;
+            }
+        }
+
+        d.Add("Content-Type", contentType);
+
+        // adding the content to the dictionary.
         MatchCollection contentBorders = Regex.Matches(line, START);
         Match startOfContent = Regex.Match(line, START); // will find where the content starts
         String content = line.Substring(startOfContent.Index + START.Length + 1 );
         d.Add("Content", content.Substring(0,content.Length - 2));
-
     }
 
+    /**
+     * processes the second part of the multipart data in order to get the caption information.
+     */
     private void CaptionData(String line, Dictionary<String, String> d)
     {
         Match captionStart = Regex.Match(line, START);
@@ -106,6 +129,9 @@ public class Request
         d.Add("Caption",caption.Substring(0, caption.Length - 2));
     }
 
+    /**
+     * processes the third part of the multipart data in order to get the date information.
+     */
     private void DateData(String line, Dictionary<String, String> d)
     {
         Match dateStart = Regex.Match(line, START);
@@ -113,13 +139,15 @@ public class Request
         d.Add("Date", date.Substring(0,date.Length - 2));
     }
 
+    /**
+     * processes the the multipart data into a dictionary for further processing.
+     */
     private void ProcessMultipart(String MultipartData)
     {
         Dictionary<String, String> MultipartDictionary = new Dictionary<String, String>();
 
         String[] multiSplit = MultipartData.Split(_boundary);
 
-        Console.WriteLine("------------------------------------------------------------------");
         for (int i = 0; i < multiSplit.Length; i++)
         {
             String line = multiSplit[i];
@@ -132,29 +160,35 @@ public class Request
             switch (i)
             {
                 case CONTENT:
-                    ContentData(line, MultipartDictionary);
+                    ContentData(line, _multipartData);
                     break;
                 case CAPTION:
-                    CaptionData(line, MultipartDictionary);
+                    CaptionData(line, _multipartData);
                     break;
                 case DATE:
-                    DateData(line, MultipartDictionary);
+                    DateData(line, _multipartData);
                     break;
                 case TYPE:
-                    MultipartDictionary.Add("Type", "Submit"); // we know the type.
+                    _multipartData.Add("Type", "Submit"); // we know the type.
                     break;
 
             }
 
-            Console.WriteLine("------------------------------------------------------------------");
         }
-
-        ReconstructFile(MultipartDictionary);
-        
-
     }
 
-    private void ReconstructFile(Dictionary<String, String> filedata)
+    /**
+     * Sets the status of the request for the response.
+     */
+    private void SetStatus(int status)
+    {
+        _status = status;
+    }
+
+    /**
+     * Reconstructs the file from the map.
+     */
+    public int ReconstructFile(Dictionary<String, String> filedata)
     {
         List<String> keys = new List<String>(filedata.Keys);
         Console.WriteLine("ALL KEYS IN MULTIPART");
@@ -167,23 +201,54 @@ public class Request
         {
             String filename = filedata["fileName"]; 
             StreamWriter fileWriter = new StreamWriter($"C:\\Users\\bradl\\Desktop\\C#\\Server-Project-1\\server\\upload\\{filename}");
-            fileWriter.Write(filedata["Content"]);
-            fileWriter.Close();
+
+            if (filedata["Content-Type"] == "image/jpeg")
+            {
+
+            } else if (filedata["Content-Type"] == "text/plain")
+            {
+                fileWriter.Write(filedata["Content"]);
+                fileWriter.Close();
+                SetStatus(OK); // set the status to 200 after a proper upload.
+            }
+            
+           
         }
         catch(Exception e)
         {
+            SetStatus(ERROR);
             Console.WriteLine(e.Message);
         }
 
+        return _status;
 
     }
-         
 
+    /**
+     * Gets the multipart data dictionary.
+     */
+    public Dictionary<String,String> GetMultiData()
+    {
+        return _multipartData;
+    }
+
+    /**
+     * Gets the status of the request.
+     */
+    public int GetStatus()
+    {
+        return _status;
+    }
+         
+    /**
+     * Parses the incoming request.
+     */
     private Dictionary<String, String> ParseRequest(String data)
     {
         Dictionary<String, String> request = new Dictionary<string, string>();
         String[] lines = data.Split("\n");
 
+        Console.WriteLine("DATA: " + data);
         int index = 0;
 
         for (var i = 0; i < lines.Length; i++)
@@ -219,12 +284,17 @@ public class Request
         return request;
     }
 
+    /**
+     * Gets the request dictionary containing all of the parses information.
+     */
     public Dictionary<String, String> GetRequestMap()
     {
         return _requestData;
     }
 
-
+    /**
+     * Overidden ToString Method.
+     */
     public override string ToString()
     {
         String description = "";
