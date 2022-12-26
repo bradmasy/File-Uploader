@@ -4,6 +4,8 @@ using System.Runtime.InteropServices.JavaScript;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 using System.IO;
+using System.Text;
+using System.Drawing;
 
 namespace server;
 
@@ -32,9 +34,9 @@ public class Request
    
     public Request(String data)
     {
-        _data = data;
+        _data          = data;
         _multipartData = new Dictionary<string, string>();
-        _requestData = ParseRequest(data);
+        _requestData   = ParseRequest(data);
     }
 
     public String GetData()
@@ -82,14 +84,14 @@ public class Request
 
     // adding the name to the dictionary.
 
-    String patternName       = "name=";
+        String patternName       = "name=";
         String patternSeparater  = ";";
         Match m                  = Regex.Match(line,patternName);
         MatchCollection sepMatch = Regex.Matches(line,patternSeparater);
         String key               =  line.Substring( (m.Index + patternName.Length + 1), (sepMatch[1].Index - m.Index - patternName.Length - 2));
         String patternFile       = "filename=";
         Match m1                 = Regex.Match(line, patternFile);
-        String quoteSeparator    = "\"";
+        String quoteSeparator    = "\""; // try to find a better thing here.
         MatchCollection quotes   = Regex.Matches(line, quoteSeparator);
         String value             = line.Substring( (m1.Index + patternFile.Length +1), (quotes[3].Index - m1.Index - patternFile.Length-1)  );
     
@@ -116,7 +118,7 @@ public class Request
         MatchCollection contentBorders = Regex.Matches(line, START);
         Match startOfContent = Regex.Match(line, START); // will find where the content starts
         String content = line.Substring(startOfContent.Index + START.Length + 1 );
-        d.Add("Content", content.Substring(0,content.Length - 2));
+        d.Add("Content", content.Substring(0,content.Length));
     }
 
     /**
@@ -199,17 +201,31 @@ public class Request
 
         try
         {
-            String filename = filedata["fileName"]; 
-            StreamWriter fileWriter = new StreamWriter($"C:\\Users\\bradl\\Desktop\\C#\\Server-Project-1\\server\\upload\\{filename}");
+            String filename         = filedata["fileName"];
+            String path             = $".\\upload\\{filename}";
+            // $"C:\\Users\\bradl\\Desktop\\C#\\Server-Project-1\\server\\upload\\{filename}"
+            StreamWriter fileWriter = new StreamWriter(path);
 
             if (filedata["Content-Type"] == "image/jpeg")
             {
+                byte[] imageBytes = Encoding.ASCII.GetBytes(filedata["Content"]);
+                Console.WriteLine($"image bytes: {imageBytes.ToString}");
+                String converted = Convert.ToBase64String(imageBytes);
+                Console.WriteLine($"converted code: {converted}");
+
+                
+                
+                fileWriter.Write(converted);
+                fileWriter.Close();
+                SetStatus(OK);
 
             } else if (filedata["Content-Type"] == "text/plain")
             {
                 fileWriter.Write(filedata["Content"]);
                 fileWriter.Close();
                 SetStatus(OK); // set the status to 200 after a proper upload.
+            } else {
+                SetStatus(ERROR);
             }
             
            
@@ -248,7 +264,6 @@ public class Request
         Dictionary<String, String> request = new Dictionary<string, string>();
         String[] lines = data.Split("\n");
 
-        Console.WriteLine("DATA: " + data);
         int index = 0;
 
         for (var i = 0; i < lines.Length; i++)
@@ -261,7 +276,6 @@ public class Request
             } 
             else if (request["Request"].Equals("Post") && lines[i].Equals(_boundary))
             {
-                Console.WriteLine("BOUNDARY FOUND");
                 break;
             }
             else

@@ -1,8 +1,9 @@
 {
   "ExpandedNodes": [
     "",
+    "\\client",
     "\\server"
   ],
-  "SelectedNode": "\\server\\UploadServlet.cs",
+  "SelectedNode": "\\client\\Program.cs",
   "PreviewInSolutionExplorer": false
 }

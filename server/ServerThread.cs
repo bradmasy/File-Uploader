@@ -25,10 +25,7 @@ class ServerThread : BaseThread
                 servlet.DoGet(response, request);
                 break;
             case "Post":
-                Console.WriteLine("HERE");
-                Console.WriteLine("BOUNDARY: " + request.GetBoundary());
                 servlet.DoPost(response,request);
-             //   servlet.DoGet(response,request);
                 break;
             default:
                 Console.WriteLine("Error");
@@ -68,9 +65,4 @@ class ServerThread : BaseThread
         HandleRequest(request,response,servlet);
         _client.Close(); // close the client after the request has been processed.
     }
-    
-    
-    
-    
-    
 }
