@@ -60,7 +60,11 @@ public class Request
         {
             if (content[0].Equals("User-Agent"))
             {
-                content[1] = "Browser"; // identify the user agent as browser, we will tweak later.
+                if (content[1].Trim() != "command line interface")
+                {
+                    content[1] = "Browser"; // identify the user agent as browser, we will tweak later.
+                }
+              
             }
             else if(content[0].Equals("Content-Type")) // to get the boundary.
             {   
@@ -69,6 +73,7 @@ public class Request
                     request.Add("Boundary", _boundary);
             }
 
+            Console.WriteLine($"adding key: {content[0]} and value: {content[1]}");
             request.Add(content[0].Trim(), content[1].Trim());
         }
     }
@@ -263,12 +268,12 @@ public class Request
     {
         Dictionary<String, String> request = new Dictionary<string, string>();
         String[] lines = data.Split("\n");
-
+        
         int index = 0;
 
         for (var i = 0; i < lines.Length; i++)
         {
-
+            Console.WriteLine($"LINE: {lines[i]}");
             if (i == 0)
             {
                 String result = lines[i].Contains("GET") ? "Get" : "Post"; // this is the http GET or POST
@@ -286,14 +291,20 @@ public class Request
 
         }
 
-   
-        string type = request["Request"] + " / HTTP / 1.1";
-        String MultipartData = data.Substring(index + type.Length);        
 
-        if (request.ContainsKey("Boundary"))
+        if (request.ContainsKey("Request"))
         {
-            ProcessMultipart(MultipartData);
+            string type = request["Request"] + " / HTTP / 1.1";
+
+
+            if (request.ContainsKey("Boundary"))
+            {
+                String MultipartData = data.Substring(index + type.Length);
+
+                ProcessMultipart(MultipartData);
+            }
         }
+      
 
         return request;
     }

@@ -48,6 +48,7 @@ class ServerThread : BaseThread
         stream.Read(bytes, 0, bytes.Length); // writes to the byte array.
         
         String data       = Encoding.UTF8.GetString(bytes); // the data to string.
+        Console.WriteLine(data);
         Request request   = new Request(data);
         Response response = new Response(stream);
         
@@ -59,6 +60,7 @@ class ServerThread : BaseThread
             servlet.SetClient(_client);
         }
         else {
+            Console.WriteLine("initiating client servlet...");
             servlet = Activator.CreateInstance<ClientServlet>();
         }
         

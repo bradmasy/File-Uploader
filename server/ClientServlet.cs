@@ -13,7 +13,7 @@ public class ClientServlet: Servlet
     
     public void DoGet(Response response, Request request)
     {
-        throw new NotImplementedException();
+        Console.WriteLine("Launching Client Servlet");
     }
 
     public void DoPost(Response response, Request request)
