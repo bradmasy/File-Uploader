@@ -37,6 +37,13 @@ public class Request
         _data          = data;
         _multipartData = new Dictionary<string, string>();
         _requestData   = ParseRequest(data);
+
+        List<String> keys = new List<String>(_requestData.Keys);
+        Console.WriteLine("ALL KEYS IN request data");
+        foreach (String key in keys)
+        {
+            Console.WriteLine("Key: [" + key + "] Value: [" + _requestData[key] + "]");
+        }
     }
 
     public String GetData()

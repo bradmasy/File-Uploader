@@ -4,11 +4,11 @@ namespace server;
 
 public class ClientServlet: Servlet
 {
-    private TcpClient _client;
+    private Socket _client;
 
-    public ClientServlet()
+    public ClientServlet(Socket client)
     {
-        _client = new TcpClient();
+        _client = client;
     }
     
     public void DoGet(Response response, Request request)
@@ -21,7 +21,7 @@ public class ClientServlet: Servlet
         throw new NotImplementedException();
     }
 
-    public void SetClient(TcpClient client)
+    public void SetClient(Socket client)
     {
         _client = client;
     }
