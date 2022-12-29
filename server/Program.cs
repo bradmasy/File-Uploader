@@ -15,18 +15,13 @@ class Program
         IPEndPoint endpoint = new IPEndPoint(IPAddress.Parse(HOST), PORT);
         Socket server       = new Socket(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
         
-        server.Bind(endpoint);
-        server.Listen(1);
-
-        //TcpListener server = new TcpListener(IPAddress.Parse("127.0.0.1"), 8000);
-        
-        //server.Start();
+        server.Bind(endpoint); // socket is bound to the endpoint local host 8000 on IP 127.0.0.1
+        server.Listen(10);
         
 
         while (true) // ensures server does not stop
         {
             Console.WriteLine("Server Running...");
-            //    TcpClient client = server.AcceptTcpClient();
             Socket client = server.Accept();
             Console.WriteLine("accepted client");
             ServerThread thread = new ServerThread(client);

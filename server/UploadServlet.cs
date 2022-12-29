@@ -39,10 +39,12 @@ namespace server
         private void ProcessPostRequest(Response response, Request request)
         {
             int responseCode = request.ReconstructFile(request.GetMultiData());
+            Console.WriteLine($"response code: {responseCode}");
 
             if (responseCode == 200)
             {
                 Byte[] responseStr = Encoding.UTF8.GetBytes(HOME);
+                Console.WriteLine("here");
                 response.WriteToStream(responseStr);
             }
 

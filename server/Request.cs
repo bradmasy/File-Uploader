@@ -37,13 +37,6 @@ public class Request
         _data          = data;
         _multipartData = new Dictionary<string, string>();
         _requestData   = ParseRequest(data);
-
-        List<String> keys = new List<String>(_requestData.Keys);
-        Console.WriteLine("ALL KEYS IN request data");
-        foreach (String key in keys)
-        {
-            Console.WriteLine("Key: [" + key + "] Value: [" + _requestData[key] + "]");
-        }
     }
 
     public String GetData()
@@ -80,7 +73,7 @@ public class Request
                     request.Add("Boundary", _boundary);
             }
 
-            Console.WriteLine($"adding key: {content[0]} and value: {content[1]}");
+           // Console.WriteLine($"adding key: {content[0]} and value: {content[1]}");
             request.Add(content[0].Trim(), content[1].Trim());
         }
     }
@@ -150,6 +143,7 @@ public class Request
     {
         Match dateStart = Regex.Match(line, START);
         String date = line.Substring(dateStart.Index + START.Length + 1);
+        Console.WriteLine($"date: {date}");
         d.Add("Date", date.Substring(0,date.Length - 2));
     }
 
@@ -159,17 +153,17 @@ public class Request
     private void ProcessMultipart(String MultipartData)
     {
         Dictionary<String, String> MultipartDictionary = new Dictionary<String, String>();
-
-        String[] multiSplit = MultipartData.Split(_boundary);
+        String[] multiSplit                            = MultipartData.Split(_boundary);
 
         for (int i = 0; i < multiSplit.Length; i++)
         {
             String line = multiSplit[i];
 
             /*
-             * this splits each chunk of multipart data, the first chucnk will contain nothing, the second will contain the content
+             * this splits each chunk of multipart data, the first chunk will contain nothing, the second will contain the content
              * of the text file as well as the name, the third will contain the caption and the fourth will contain the date
              */
+            Console.WriteLine(line);
 
             switch (i)
             {
@@ -199,31 +193,39 @@ public class Request
         _status = status;
     }
 
+
+    public static String GetTimestamp(DateTime value)
+    {
+        return value.ToString("yyyyMMddHHmmssffff");
+    }
+
     /**
      * Reconstructs the file from the map.
      */
     public int ReconstructFile(Dictionary<String, String> filedata)
     {
         List<String> keys = new List<String>(filedata.Keys);
-        Console.WriteLine("ALL KEYS IN MULTIPART");
+      //  Console.WriteLine("ALL KEYS IN MULTIPART");
         foreach(String key in keys)
         {
-            Console.WriteLine("Key: [" + key + "] Value: [" + filedata[key] +"]");
+       //     Console.WriteLine("Key: [" + key + "] Value: [" + filedata[key] +"]");
         }
 
         try
         {
             String filename         = filedata["fileName"];
-            String path             = $".\\upload\\{filename}";
+            String date             = filedata["Date"];
+            String timestamp        = GetTimestamp(DateTime.Now);
+            String path             = $"C:\\Users\\bradl\\Desktop\\C#\\Server-Project-1\\server\\upload\\{filename}-{date}-{timestamp}";
             // $"C:\\Users\\bradl\\Desktop\\C#\\Server-Project-1\\server\\upload\\{filename}"
             StreamWriter fileWriter = new StreamWriter(path);
 
             if (filedata["Content-Type"] == "image/jpeg")
             {
                 byte[] imageBytes = Encoding.ASCII.GetBytes(filedata["Content"]);
-                Console.WriteLine($"image bytes: {imageBytes.ToString}");
+             //   Console.WriteLine($"image bytes: {imageBytes.ToString}");
                 String converted = Convert.ToBase64String(imageBytes);
-                Console.WriteLine($"converted code: {converted}");
+              //  Console.WriteLine($"converted code: {converted}");
 
                 
                 
@@ -280,7 +282,7 @@ public class Request
 
         for (var i = 0; i < lines.Length; i++)
         {
-            Console.WriteLine($"LINE: {lines[i]}");
+           // Console.WriteLine($"LINE: {lines[i]}");
             if (i == 0)
             {
                 String result = lines[i].Contains("GET") ? "Get" : "Post"; // this is the http GET or POST

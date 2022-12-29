@@ -14,7 +14,6 @@ public class Response
 
     public void WriteToStream(Byte[] response)
     {
-        //_stream.Write(response, 0, response.Length);
         _stream.Send(response);
     }
 
