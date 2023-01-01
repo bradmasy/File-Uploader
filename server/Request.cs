@@ -214,10 +214,9 @@ public class Request
         try
         {
             String filename         = filedata["fileName"];
-            String date             = filedata["Date"];
+          //  String date             = filedata["Date"];
             String timestamp        = GetTimestamp(DateTime.Now);
-            String path             = $"C:\\Users\\bradl\\Desktop\\C#\\Server-Project-1\\server\\upload\\{filename}-{date}-{timestamp}";
-            // $"C:\\Users\\bradl\\Desktop\\C#\\Server-Project-1\\server\\upload\\{filename}"
+            String path             = $"C:\\Users\\bradl\\Desktop\\C#\\Server-Project-1\\server\\upload\\{timestamp}-{filename}";
             StreamWriter fileWriter = new StreamWriter(path);
 
             if (filedata["Content-Type"] == "image/jpeg")

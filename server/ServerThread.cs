@@ -36,6 +36,7 @@ class ServerThread : BaseThread
                 break;
             case "Post":
                 servlet.DoPost(response, request);
+                servlet.DoGet(response, request);
                 break;
             default:
                 Console.WriteLine("Error");
@@ -50,7 +51,9 @@ class ServerThread : BaseThread
         byte[] buffer      = new byte[_client.Available];
         int bytes_recieved = _client.Receive(buffer);
 
+        // keep looping until all data is recieved
 
+        
         if (bytes_recieved != 0) // block the thread if no bytes
         {
             String data       = Encoding.ASCII.GetString(buffer, 0, buffer.Length);
