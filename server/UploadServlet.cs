@@ -44,7 +44,6 @@ namespace server
             if (responseCode == 200)
             {
                 Byte[] responseStr = Encoding.UTF8.GetBytes(HOME);
-                Console.WriteLine("here");
                 response.WriteToStream(responseStr);
             }
 

@@ -3,6 +3,7 @@
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -12,21 +13,14 @@ class Program
 
 
     private const string HOST = "localhost";
+    private const string HOST_IP = "127.0.0.1";
+
     private const int PORT    = 8000;
     
 
-    private static void Welcome_Message()
-    {
-        Console.WriteLine("Welcome To the Program, here are your options:");
-        Console.WriteLine("1. Upload Photo");
-        Console.WriteLine("2. Upload File");
-        Console.WriteLine("3. Messenger Application");
-        Console.WriteLine("4. Exit");
-        Console.WriteLine("\n");
-    }
 
 
-    private static bool Upload_Photo(TcpClient client)
+    private static bool Upload_Photo(Socket client)
     {
         Console.WriteLine("Please input the path to the image you wish to upload:\n");
 
@@ -36,7 +30,7 @@ class Program
 
         byte[] message = Encoding.ASCII.GetBytes(req);
 
-        client.GetStream().Write(message, 0, message.Length); // test message.
+//        client.GetStream().Write(message, 0, message.Length); // test message.
 
         return true;
 
@@ -49,14 +43,26 @@ class Program
         return builder.ToString();
     }
 
+    private static bool Upload_File(Socket client)
+    {
+        bool continue_program = true;
+        Console.WriteLine("Please input the path to the file you wish to upload:\n");
 
-    private static bool Launch_Application(TcpClient client)
+        string file_path = Console.ReadLine();
+        String req = Build_Post_Request();
+        Console.WriteLine(req);
+        byte[] message = Encoding.ASCII.GetBytes(req);
+        Console.WriteLine(client.LocalEndPoint);
+        client.Send(message);
+        return continue_program;
+    }
+
+    private static bool Launch_Application(Socket client)
     {
         bool continue_program = true;
         string input          = Console.ReadLine();
         string input_regex    = @"^[1-4]$"; // match for only 1 number from 1 - 4
         bool m                = Regex.IsMatch(input, input_regex);
-
 
         if (m)
         {
@@ -66,6 +72,7 @@ class Program
                     continue_program = Upload_Photo(client);
                     break;
                 case 2:
+                    continue_program = Upload_File(client);
                     break;
                 case 3:
                     break;
@@ -78,13 +85,33 @@ class Program
         return continue_program;
     }
 
+    private static String Create_Boundary()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.Append("aB29shwl109");
+        return builder.ToString() ;
+          
+    }
+
+    private static String Build_Get_Request()
+    {
+        StringBuilder builder = new StringBuilder() ;
+        builder.Append("GET / HTTP/1.1\n");
+        builder.Append("Host: localhost:8000\n");
+        builder.Append("Connection: keep-alive\n");
+        builder.Append("User-Agent: CLI\n");       
+        return builder.ToString();
+    }
     private static String Build_Post_Request()
     {
-        StringBuilder builder = new StringBuilder();    
+        StringBuilder builder = new StringBuilder();
+        String charset = "UTF-8";
+        String boundary = Create_Boundary();
         builder.Append("POST / HTTP/1.1\n");
         builder.Append("Host: localhost:8000\n");
         builder.Append("Connection: keep-alive\n");
-        builder.Append("User-Agent: command line interface\n\r");
+        builder.Append("User-Agent: CLI\n\r");
+        builder.Append($"Content-Type: multipart/form-data; boundary=--------------{boundary}\n");
 
         /**
         * GET / HTTP/1.1
@@ -106,17 +133,44 @@ class Program
         return builder.ToString();
     }
 
-    static void Main(string[] args)
+    private static void Send_Initial_Request(Socket client)
     {
-        TcpClient client = new TcpClient(HOST, 8000);
-      //  byte[] message   = Encoding.ASCII.GetBytes("Connection Established...");
+        String req = Build_Get_Request();
+        client.Send(Encoding.ASCII.GetBytes(req));
+    }
 
-   //     client.GetStream().Write(message, 0, message.Length); // test message.
+    private static Socket Establish_Connection()
+    {
+        IPEndPoint endpoint = new IPEndPoint(IPAddress.Parse(HOST_IP), PORT);
+        Socket client       = new Socket(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+        client.Connect(endpoint);
+        return client;
+    }
+
+    private static void Welcome_Message()
+    {
+
+        Console.WriteLine("Welcome To the Program, here are your options:");
+        Console.WriteLine("1. Upload Photo");
+        Console.WriteLine("2. Upload File");
+        Console.WriteLine("3. Messenger Application");
+        Console.WriteLine("4. Exit");
+        Console.WriteLine("\n");
+    }
 
 
+    public static void Main(string[] args)
+    {
+        
+        Socket client = Establish_Connection();
+
+        Send_Initial_Request(client);
+        
         bool continue_program = true;
-
-        Welcome_Message();
+   
+        Console.WriteLine(client.Available);
+  
+        Welcome_Message();        
 
         while (continue_program)
         {

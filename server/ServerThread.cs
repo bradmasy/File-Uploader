@@ -36,7 +36,7 @@ class ServerThread : BaseThread
                 break;
             case "Post":
                 servlet.DoPost(response, request);
-                servlet.DoGet(response, request);
+               // servlet.DoGet(response, request);
                 break;
             default:
                 Console.WriteLine("Error");
@@ -57,7 +57,9 @@ class ServerThread : BaseThread
         if (bytes_recieved != 0) // block the thread if no bytes
         {
             String data       = Encoding.ASCII.GetString(buffer, 0, buffer.Length);
+            Console.WriteLine(data);
             Request request   = new Request(data);
+            Console.WriteLine(request);
             Response response = new Response(_client);
 
             Servlet servlet;
@@ -68,17 +70,19 @@ class ServerThread : BaseThread
                 //   Console.WriteLine($" Constructor name: {info[0].Name}");
                 // servlet = info[0].Invoke(_client);
                 servlet = (UploadServlet)Activator.CreateInstance(typeof(UploadServlet), _client);
-                servlet.SetClient(_client);
             }
             else
             {
                 Console.WriteLine("initiating client servlet...");
-                servlet = Activator.CreateInstance<ClientServlet>();
+                servlet = (ClientServlet)Activator.CreateInstance(typeof(ClientServlet), _client);
             }
+
+            servlet.SetClient(_client);
 
             HandleRequest(request, response, servlet);
         }
 
+        Console.WriteLine("here");
         _client.Close(); // close the client after the request has been processed.
     }
 }

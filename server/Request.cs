@@ -7,6 +7,7 @@ using System.IO;
 using System.Text;
 using System.Drawing;
 
+
 namespace server;
 
 public class Request
@@ -60,7 +61,7 @@ public class Request
         {
             if (content[0].Equals("User-Agent"))
             {
-                if (content[1].Trim() != "command line interface")
+                if (content[1].Trim() != "CLI")
                 {
                     content[1] = "Browser"; // identify the user agent as browser, we will tweak later.
                 }
@@ -85,7 +86,7 @@ public class Request
     private void ContentData(String line, Dictionary<String,String> d)
     {
 
-       String[] CONTENT_VALUES = new String[2] { "text/plain", "image/jpeg" };
+       String[] CONTENT_VALUES = new String[3] { "text/plain", "image/jpeg","image/png" };
 
     // adding the name to the dictionary.
 
@@ -109,20 +110,21 @@ public class Request
         for(int i = 0; i < CONTENT_VALUES.Length; i++)
         {
             String each = CONTENT_VALUES[i];
-
+          //  Console.WriteLine($"each: {each}");
             if (Regex.IsMatch(line,each))
             {
                 contentType = CONTENT_VALUES[i];
                 break;
             }
         }
-
+        Console.WriteLine("content is: " + contentType);
         d.Add("Content-Type", contentType);
 
         // adding the content to the dictionary.
         MatchCollection contentBorders = Regex.Matches(line, START);
-        Match startOfContent = Regex.Match(line, START); // will find where the content starts
-        String content = line.Substring(startOfContent.Index + START.Length + 1 );
+        Match startOfContent           = Regex.Match(line, START); // will find where the content starts
+        String content                 = line.Substring(startOfContent.Index + START.Length + 1 );
+        Console.WriteLine($"Content:[{content}]");
         d.Add("Content", content.Substring(0,content.Length));
     }
 
@@ -132,7 +134,7 @@ public class Request
     private void CaptionData(String line, Dictionary<String, String> d)
     {
         Match captionStart = Regex.Match(line, START);
-        String caption = line.Substring(captionStart.Index + START.Length + 1);
+        String caption     = line.Substring(captionStart.Index + START.Length + 1);
         d.Add("Caption",caption.Substring(0, caption.Length - 2));
     }
 
@@ -179,9 +181,7 @@ public class Request
                 case TYPE:
                     _multipartData.Add("Type", "Submit"); // we know the type.
                     break;
-
             }
-
         }
     }
 
@@ -199,6 +199,8 @@ public class Request
         return value.ToString("yyyyMMddHHmmssffff");
     }
 
+
+
     /**
      * Reconstructs the file from the map.
      */
@@ -208,7 +210,7 @@ public class Request
       //  Console.WriteLine("ALL KEYS IN MULTIPART");
         foreach(String key in keys)
         {
-       //     Console.WriteLine("Key: [" + key + "] Value: [" + filedata[key] +"]");
+            Console.WriteLine("Key: [" + key + "] Value: [" + filedata[key] +"]");
         }
 
         try
@@ -218,16 +220,14 @@ public class Request
             String timestamp        = GetTimestamp(DateTime.Now);
             String path             = $"C:\\Users\\bradl\\Desktop\\C#\\Server-Project-1\\server\\upload\\{timestamp}-{filename}";
             StreamWriter fileWriter = new StreamWriter(path);
-
-            if (filedata["Content-Type"] == "image/jpeg")
+            Console.WriteLine($"File Type: {filedata["Content-Type"]}");
+            if (filedata["Content-Type"] == "image/png")
             {
                 byte[] imageBytes = Encoding.ASCII.GetBytes(filedata["Content"]);
              //   Console.WriteLine($"image bytes: {imageBytes.ToString}");
                 String converted = Convert.ToBase64String(imageBytes);
-              //  Console.WriteLine($"converted code: {converted}");
+                //  Console.WriteLine($"converted code: {converted}");
 
-                
-                
                 fileWriter.Write(converted);
                 fileWriter.Close();
                 SetStatus(OK);
@@ -334,8 +334,7 @@ public class Request
         
         foreach (var each in _requestData)
         {
-            description += "Key: " + each.Key + " | Val: " +each.Value +"\n";
-            
+            description += "Key: " + each.Key + " | Val: " + each.Value + "\n";
         }
 
         return description;

@@ -1,0 +1,12 @@
+class ClientInterface
+{
+
+
+    public ClientInterface()
+    {
+
+    }
+
+
+
+}
