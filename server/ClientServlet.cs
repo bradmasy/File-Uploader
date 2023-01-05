@@ -35,7 +35,7 @@ public class ClientServlet: Servlet
 
     public void DoPost(Response response, Request request)
     {
-        Console.WriteLine(request.ToString()); 
+        Console.WriteLine("---------------------REQUEST----------------------- \n" + request.ToString()); 
     }
 
     public void SetClient(Socket client)

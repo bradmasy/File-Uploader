@@ -70,8 +70,10 @@ public class Request
             else if(content[0].Equals("Content-Type")) // to get the boundary.
             {   
                     String[] splitContent = content[1].Split(";");
-                    _boundary = "------" + splitContent[1].Substring(OFFSET);
-                    Console.WriteLine($"boundary: {_boundary}");
+                    Console.WriteLine($"split: [{splitContent[1]}]");
+                    //Console.WriteLine(OFFSET);
+                    _boundary = "------" + splitContent[1].Trim().Substring(OFFSET -1);
+                    Console.WriteLine($"boundary: [{_boundary}]");
                     request.Add("Boundary", _boundary);
             }
 
@@ -155,6 +157,8 @@ public class Request
      */
     private void ProcessMultipart(String MultipartData)
     {
+
+        Console.WriteLine($"MULTI:\n{MultipartData}");
         Dictionary<String, String> MultipartDictionary = new Dictionary<String, String>();
         String[] multiSplit                            = MultipartData.Split(_boundary);
 
@@ -288,7 +292,7 @@ public class Request
                 String result = lines[i].Contains("GET") ? "Get" : "Post"; // this is the http GET or POST
                 request.Add("Request", result);
             } 
-            else if (request["Request"].Equals("Post") && lines[i].Equals(_boundary))
+            else if (request["Request"].Equals("Post") && lines[i].Trim().Equals(_boundary))
             {
                 Console.WriteLine("breaking on boundary");
                 break;
@@ -301,6 +305,7 @@ public class Request
 
         }
 
+        Console.WriteLine($"\nWe have made it heren \n");
 
         if (request.ContainsKey("Request"))
         {
@@ -309,8 +314,11 @@ public class Request
 
             if (request.ContainsKey("Boundary"))
             {
+                Console.WriteLine("request size: " + type.Length);
+                Console.WriteLine("data size: "+ index);
+                Console.WriteLine("move this amount: " + (index +  type.Length));
                 String MultipartData = data.Substring(index + type.Length);
-                Console.WriteLine($"multipart: {MultipartData}");
+                Console.WriteLine($"multipart: [{MultipartData}]");
                 ProcessMultipart(MultipartData);
             }
         }

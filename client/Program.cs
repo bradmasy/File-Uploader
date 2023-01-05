@@ -103,7 +103,7 @@ class Program
     private static String Create_Boundary()
     {
         StringBuilder builder = new StringBuilder();
-        builder.Append("aB29sh23wl109456");
+        builder.Append("syTrWiNhk1fONdsm");
         return builder.ToString() ;
     }
 
@@ -122,18 +122,30 @@ class Program
         String charset        = "UTF-8";
         String boundary       = Create_Boundary();
 
+        Console.WriteLine("Length of data: " + data.Length);
         builder.Append("POST / HTTP/1.1\r\n");
         builder.Append("Host: localhost:8000\n");
-        builder.Append("Connection: keep-alive\r\n");
-        builder.Append("User-Agent: CLI\r\n");
-        builder.Append($"Content-Type: multipart/form-data; boundary=----WebKitFormBoundary{boundary}\r\n");
+        builder.Append("User-Agent: CLI\n");
+        builder.Append("Connection: keep-alive\n");
+        builder.Append($"Content-Length: {data.Length}\n");
+        builder.Append("Cache-Control: max-age=0\n");
+        builder.Append("sec-ch-ua: \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"108\", \"Google Chrome\";v=\"108\"\n");
+        builder.Append("sec-ch-ua-mobile: ?0\n");
+        builder.Append("sec-ch-ua-platform: \"Windows\"\n");
+        builder.Append("Upgrade-Insecure-Requests: 1\n");
+        builder.Append("Origin: http://localhost:8000\n");
+        builder.Append($"Content-Type: multipart/form-data; boundary=----WebKitFormBoundary{boundary}\n");
+        builder.Append("Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
+       // builder.Append("");
 
+        // this is where the multipart data is written.
         switch(data_type){
             case TEXT_FILE:
-                builder.Append($"------WebKitFormBoundary{boundary}\r\n");
-                builder.Append($"Content-Disposition: form-data; name=\"fileName\"; filename={"test.txt"}\r\n");
-                builder.Append($"Content-Type: text/plain\r\n");
-                builder.Append("\r\n");
+                builder.Append("\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n");
+                builder.Append($"------WebKitFormBoundary{boundary}\n");
+                builder.Append($"Content-Disposition: form-data; name=\"fileName\"; filename=\"test.txt\"\r\n");
+                builder.Append($"Content-Type: text/plain\n\n");
+                //builder.Append("\r\n");
                 builder.Append(data);
                 break;
             
