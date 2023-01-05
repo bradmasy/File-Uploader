@@ -10,15 +10,7 @@ using server;
 class ServerThread : BaseThread
 {
 
-    //private TcpClient _client;
     private Socket _client;
-
-    //  public ServerThread(TcpClient client) : base()
-    // {
-    //    _client = client;
-    //   _thread.Start();
-    // }
-
 
     public ServerThread(Socket client) : base()
     {
@@ -82,7 +74,6 @@ class ServerThread : BaseThread
             HandleRequest(request, response, servlet);
         }
 
-        Console.WriteLine("here");
         _client.Close(); // close the client after the request has been processed.
     }
 }

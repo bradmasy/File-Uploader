@@ -4,6 +4,6 @@
     "\\client",
     "\\server"
   ],
-  "SelectedNode": "\\server\\Response.cs",
+  "SelectedNode": "\\server\\ClientServlet.cs",
   "PreviewInSolutionExplorer": false
 }

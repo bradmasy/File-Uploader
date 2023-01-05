@@ -71,6 +71,7 @@ public class Request
             {   
                     String[] splitContent = content[1].Split(";");
                     _boundary = "------" + splitContent[1].Substring(OFFSET);
+                    Console.WriteLine($"boundary: {_boundary}");
                     request.Add("Boundary", _boundary);
             }
 
@@ -281,7 +282,7 @@ public class Request
 
         for (var i = 0; i < lines.Length; i++)
         {
-           // Console.WriteLine($"LINE: {lines[i]}");
+            Console.WriteLine($"LINE: {lines[i]}");
             if (i == 0)
             {
                 String result = lines[i].Contains("GET") ? "Get" : "Post"; // this is the http GET or POST
@@ -289,6 +290,7 @@ public class Request
             } 
             else if (request["Request"].Equals("Post") && lines[i].Equals(_boundary))
             {
+                Console.WriteLine("breaking on boundary");
                 break;
             }
             else
@@ -308,7 +310,7 @@ public class Request
             if (request.ContainsKey("Boundary"))
             {
                 String MultipartData = data.Substring(index + type.Length);
-
+                Console.WriteLine($"multipart: {MultipartData}");
                 ProcessMultipart(MultipartData);
             }
         }

@@ -9,7 +9,6 @@ abstract class BaseThread{
 
     protected BaseThread()
     {
-        Console.WriteLine("here");
         _thread = new Thread(new ThreadStart(Run));
     }
 

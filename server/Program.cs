@@ -16,15 +16,19 @@ class Program
         Socket server       = new Socket(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
         
         server.Bind(endpoint); // socket is bound to the endpoint local host 8000 on IP 127.0.0.1
-        server.Listen(10);
-        
+        server.Listen();
+
+        Console.WriteLine("Server Running...");
+
+        int count = 1;
 
         while (true) // ensures server does not stop
         {
-            Console.WriteLine("Server Running...");
+            Console.WriteLine($"accepted: {count}");
             Socket client = server.Accept();
-            Console.WriteLine("accepted client");
+            Console.WriteLine("accepted client...initiating new thread");
             ServerThread thread = new ServerThread(client);
+            count++;
         }
         server.Close();
     }
