@@ -135,16 +135,23 @@ class Program
         builder.Append("Upgrade-Insecure-Requests: 1\n");
         builder.Append("Origin: http://localhost:8000\n");
         builder.Append($"Content-Type: multipart/form-data; boundary=----WebKitFormBoundary{boundary}\n");
-        builder.Append("Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
-       // builder.Append("");
+        builder.Append("Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9\n");
+        builder.Append("Sec-Fetch-Site: same-origin\n");
+        builder.Append("Sec-Fetch-Mode: navigate\n");
+        builder.Append("Sec-Fetch-User: ?1\n");
+        builder.Append("Sec-Fetch-Dest: document\n");
+        builder.Append("Referer: local\n");
+        builder.Append("Accept-Encoding: gzip, deflate, br\n");
+        builder.Append("Accept-Language: en-US,en;q=0.9\r\n\r\n");
+  
 
         // this is where the multipart data is written.
         switch(data_type){
             case TEXT_FILE:
-                builder.Append("\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n");
+              //  builder.Append("\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n");
                 builder.Append($"------WebKitFormBoundary{boundary}\n");
-                builder.Append($"Content-Disposition: form-data; name=\"fileName\"; filename=\"test.txt\"\r\n");
-                builder.Append($"Content-Type: text/plain\n\n");
+                builder.Append($"Content-Disposition: form-data; name=\"fileName\"; filename=\"test.txt\"\n");
+                builder.Append($"Content-Type: text/plain\n\r\n");
                 //builder.Append("\r\n");
                 builder.Append(data);
                 break;

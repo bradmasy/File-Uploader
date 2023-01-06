@@ -70,10 +70,7 @@ public class Request
             else if(content[0].Equals("Content-Type")) // to get the boundary.
             {   
                     String[] splitContent = content[1].Split(";");
-                    Console.WriteLine($"split: [{splitContent[1]}]");
-                    //Console.WriteLine(OFFSET);
                     _boundary = "------" + splitContent[1].Trim().Substring(OFFSET -1);
-                    Console.WriteLine($"boundary: [{_boundary}]");
                     request.Add("Boundary", _boundary);
             }
 
@@ -98,6 +95,7 @@ public class Request
         Match m                  = Regex.Match(line,patternName);
         MatchCollection sepMatch = Regex.Matches(line,patternSeparater);
         String key               =  line.Substring( (m.Index + patternName.Length + 1), (sepMatch[1].Index - m.Index - patternName.Length - 2));
+       Console.WriteLine($"KEY SHOULD BE FILE DATA: [{key}]");
         String patternFile       = "filename=";
         Match m1                 = Regex.Match(line, patternFile);
         String quoteSeparator    = "\""; // try to find a better thing here.
@@ -113,7 +111,7 @@ public class Request
         for(int i = 0; i < CONTENT_VALUES.Length; i++)
         {
             String each = CONTENT_VALUES[i];
-          //  Console.WriteLine($"each: {each}");
+            Console.WriteLine($"each: {each}");
             if (Regex.IsMatch(line,each))
             {
                 contentType = CONTENT_VALUES[i];
@@ -170,7 +168,7 @@ public class Request
              * this splits each chunk of multipart data, the first chunk will contain nothing, the second will contain the content
              * of the text file as well as the name, the third will contain the caption and the fourth will contain the date
              */
-            Console.WriteLine(line);
+            Console.WriteLine("current line: " + line);
 
             switch (i)
             {
@@ -186,8 +184,19 @@ public class Request
                 case TYPE:
                     _multipartData.Add("Type", "Submit"); // we know the type.
                     break;
+                default:
+                    break;
             }
         }
+
+        Console.WriteLine("AFTER SWITCH");
+
+        List<String> keys = new List<String>(MultipartDictionary.Keys); 
+        foreach(String k in keys){
+            Console.WriteLine($"M KEY: {k} | M VAL: {MultipartDictionary[k]}");
+        }
+
+        ReconstructFile(MultipartDictionary);
     }
 
     /**
@@ -212,7 +221,7 @@ public class Request
     public int ReconstructFile(Dictionary<String, String> filedata)
     {
         List<String> keys = new List<String>(filedata.Keys);
-      //  Console.WriteLine("ALL KEYS IN MULTIPART");
+        Console.WriteLine("ALL KEYS IN MULTIPART");
         foreach(String key in keys)
         {
             Console.WriteLine("Key: [" + key + "] Value: [" + filedata[key] +"]");
