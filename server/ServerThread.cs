@@ -28,7 +28,6 @@ class ServerThread : BaseThread
                 break;
             case "Post":
                 servlet.DoPost(response, request);
-               // servlet.DoGet(response, request);
                 break;
             default:
                 Console.WriteLine("Error");
@@ -56,7 +55,6 @@ class ServerThread : BaseThread
 
             Servlet servlet;
             
-
             if (request.GetRequestMap()["User-Agent"].Equals("Browser"))
             {
                 ConstructorInfo[] info = Type.GetType("server.UploadServlet").GetConstructors();

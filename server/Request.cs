@@ -95,12 +95,13 @@ public class Request
         Match m                  = Regex.Match(line,patternName);
         MatchCollection sepMatch = Regex.Matches(line,patternSeparater);
         String key               =  line.Substring( (m.Index + patternName.Length + 1), (sepMatch[1].Index - m.Index - patternName.Length - 2));
+        Console.WriteLine($"key: [{key}]");
         String patternFile       = "filename=";
         Match m1                 = Regex.Match(line, patternFile);
         String quoteSeparator    = "\""; // try to find a better thing here.
         MatchCollection quotes   = Regex.Matches(line, quoteSeparator);
         String value             = line.Substring( (m1.Index + patternFile.Length +1), (quotes[3].Index - m1.Index - patternFile.Length-1)  );
-    
+        Console.WriteLine($"file name value: {value}");
         d.Add(key, value);
 
         // adding the content type.
@@ -156,9 +157,7 @@ public class Request
     private void ProcessMultipart(String MultipartData)
     {
 
-        Console.WriteLine($"MULTI:\n{MultipartData}");
-        Dictionary<String, String> MultipartDictionary = new Dictionary<String, String>();
-        String[] multiSplit                            = MultipartData.Split(_boundary);
+        String[] multiSplit = MultipartData.Split(_boundary);
 
         for (int i = 0; i < multiSplit.Length; i++)
         {
@@ -191,12 +190,11 @@ public class Request
 
         Console.WriteLine("AFTER SWITCH");
 
-        List<String> keys = new List<String>(MultipartDictionary.Keys); 
+        List<String> keys = new List<String>(_multipartData.Keys); 
         foreach(String k in keys){
-            Console.WriteLine($"M KEY: {k} | M VAL: {MultipartDictionary[k]}");
+            Console.WriteLine($"M KEY: {k} | M VAL: {_multipartData[k]}");
         }
 
-        ReconstructFile(MultipartDictionary);
     }
 
     /**
@@ -230,6 +228,7 @@ public class Request
         try
         {
             String filename         = filedata["fileName"];
+            Console.WriteLine($"File Name: {filename}");
           //  String date             = filedata["Date"];
             String timestamp        = GetTimestamp(DateTime.Now);
             String path             = $"C:\\Users\\bradl\\Desktop\\C#\\Server-Project-1\\server\\upload\\{timestamp}-{filename}";

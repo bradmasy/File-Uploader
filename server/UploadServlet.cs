@@ -8,15 +8,7 @@ namespace server
 
         public const String HOME = "HTTP/1.1 200 OK\nContent-Type:text/html\nContent-Length: 600\n\n<!DOCTYPE html>\r\n<html>\r\n<head>\r\n<title> File Upload Form</title>\r\n</head>\r\n<body>\r\n<h1>Upload file</h1>\r\n<form id =\"form\" method=\"POST\" action=\"/\" enctype=\"multipart/form-data\">\r\n<input type=\"file\" name=\"fileName\"/><br/><br/>\r\nCaption: <input type =\"text\" name=\"caption\"<br/><br/>\r\n <br/>\nDate : <input type=\"date\" name=\"date\"<br/><br/>\r\n <br/>\n <input id='formBtn' type=\"submit\" name=\"submit\" value=\"Submit\"/>\r\n </form>\r\n</body>\r\n</html>\r\n";
 
-        //private TcpClient _client;
-
         private Socket _client;
-        //public UploadServlet()
-        //{
-        // _client = new TcpClient();
-        //  Console.WriteLine("Creating upload servlet");
-        // }
-
 
         public UploadServlet(Socket client)
         {
@@ -44,7 +36,7 @@ namespace server
             if (responseCode == 200)
             {
                 Byte[] responseStr = Encoding.UTF8.GetBytes(HOME);
-                response.WriteToStream(responseStr);
+                response.WriteToStream(responseStr); // directory listing???
             }
 
         }
