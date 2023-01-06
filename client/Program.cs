@@ -144,7 +144,6 @@ class Program
         builder.Append("Accept-Encoding: gzip, deflate, br\n");
         builder.Append("Accept-Language: en-US,en;q=0.9\r\n\r\n");
   
-
         // this is where the multipart data is written.
         switch(data_type){
             case TEXT_FILE:

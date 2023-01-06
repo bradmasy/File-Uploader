@@ -95,7 +95,6 @@ public class Request
         Match m                  = Regex.Match(line,patternName);
         MatchCollection sepMatch = Regex.Matches(line,patternSeparater);
         String key               =  line.Substring( (m.Index + patternName.Length + 1), (sepMatch[1].Index - m.Index - patternName.Length - 2));
-       Console.WriteLine($"KEY SHOULD BE FILE DATA: [{key}]");
         String patternFile       = "filename=";
         Match m1                 = Regex.Match(line, patternFile);
         String quoteSeparator    = "\""; // try to find a better thing here.
@@ -124,6 +123,7 @@ public class Request
         // adding the content to the dictionary.
         MatchCollection contentBorders = Regex.Matches(line, START);
         Match startOfContent           = Regex.Match(line, START); // will find where the content starts
+        Console.WriteLine($"start of content: {startOfContent.Index}");
         String content                 = line.Substring(startOfContent.Index + START.Length + 1 );
         Console.WriteLine($"Content:[{content}]");
         d.Add("Content", content.Substring(0,content.Length));
