@@ -55,6 +55,7 @@ class ServerThread : BaseThread
             Response response = new Response(_client);
 
             Servlet servlet;
+            
 
             if (request.GetRequestMap()["User-Agent"].Equals("Browser"))
             {
