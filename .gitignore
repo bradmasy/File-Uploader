@@ -1,0 +1,14 @@
+.idea
+.idea/*
+.vs
+.vs/*
+client/bin
+client/bin/*
+client/obj
+client/obj/*
+server/bin
+server/bin/*
+server/obj
+server/obj/*
+server/upload
+server/upload/*

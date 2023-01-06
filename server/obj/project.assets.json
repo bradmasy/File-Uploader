@@ -8,19 +8,19 @@
     "net7.0": []
   },
   "packageFolders": {
-    "C:\\Users\\m\\.nuget\\packages\\": {}
+    "C:\\Users\\Mai Phuong\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\m\\Documents\\Monica\\BCIT Courses\\Level 4\\Client Server\\Distributed Software Arch (4945)\\Assignment 1\\c--server\\server\\server.csproj",
+      "projectUniqueName": "D:\\BCIT\\Term4-Jan2023\\COMP4945\\Assignment1\\server\\server.csproj",
       "projectName": "server",
-      "projectPath": "C:\\Users\\m\\Documents\\Monica\\BCIT Courses\\Level 4\\Client Server\\Distributed Software Arch (4945)\\Assignment 1\\c--server\\server\\server.csproj",
-      "packagesPath": "C:\\Users\\m\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\m\\Documents\\Monica\\BCIT Courses\\Level 4\\Client Server\\Distributed Software Arch (4945)\\Assignment 1\\c--server\\server\\obj\\",
+      "projectPath": "D:\\BCIT\\Term4-Jan2023\\COMP4945\\Assignment1\\server\\server.csproj",
+      "packagesPath": "C:\\Users\\Mai Phuong\\.nuget\\packages\\",
+      "outputPath": "D:\\BCIT\\Term4-Jan2023\\COMP4945\\Assignment1\\server\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\m\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Mai Phuong\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [

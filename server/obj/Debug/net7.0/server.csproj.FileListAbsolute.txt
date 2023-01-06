@@ -28,3 +28,18 @@ C:\Users\m\Documents\Monica\BCIT Courses\Level 4\Client Server\Distributed Softw
 C:\Users\m\Documents\Monica\BCIT Courses\Level 4\Client Server\Distributed Software Arch (4945)\Assignment 1\c--server\server\obj\Debug\net7.0\server.pdb
 C:\Users\m\Documents\Monica\BCIT Courses\Level 4\Client Server\Distributed Software Arch (4945)\Assignment 1\c--server\server\obj\Debug\net7.0\server.genruntimeconfig.cache
 C:\Users\m\Documents\Monica\BCIT Courses\Level 4\Client Server\Distributed Software Arch (4945)\Assignment 1\c--server\server\obj\Debug\net7.0\ref\server.dll
+D:\BCIT\Term4-Jan2023\COMP4945\Assignment1\server\bin\Debug\net7.0\server.exe
+D:\BCIT\Term4-Jan2023\COMP4945\Assignment1\server\bin\Debug\net7.0\server.deps.json
+D:\BCIT\Term4-Jan2023\COMP4945\Assignment1\server\bin\Debug\net7.0\server.runtimeconfig.json
+D:\BCIT\Term4-Jan2023\COMP4945\Assignment1\server\bin\Debug\net7.0\server.dll
+D:\BCIT\Term4-Jan2023\COMP4945\Assignment1\server\bin\Debug\net7.0\server.pdb
+D:\BCIT\Term4-Jan2023\COMP4945\Assignment1\server\obj\Debug\net7.0\server.csproj.AssemblyReference.cache
+D:\BCIT\Term4-Jan2023\COMP4945\Assignment1\server\obj\Debug\net7.0\server.GeneratedMSBuildEditorConfig.editorconfig
+D:\BCIT\Term4-Jan2023\COMP4945\Assignment1\server\obj\Debug\net7.0\server.AssemblyInfoInputs.cache
+D:\BCIT\Term4-Jan2023\COMP4945\Assignment1\server\obj\Debug\net7.0\server.AssemblyInfo.cs
+D:\BCIT\Term4-Jan2023\COMP4945\Assignment1\server\obj\Debug\net7.0\server.csproj.CoreCompileInputs.cache
+D:\BCIT\Term4-Jan2023\COMP4945\Assignment1\server\obj\Debug\net7.0\server.dll
+D:\BCIT\Term4-Jan2023\COMP4945\Assignment1\server\obj\Debug\net7.0\refint\server.dll
+D:\BCIT\Term4-Jan2023\COMP4945\Assignment1\server\obj\Debug\net7.0\server.pdb
+D:\BCIT\Term4-Jan2023\COMP4945\Assignment1\server\obj\Debug\net7.0\server.genruntimeconfig.cache
+D:\BCIT\Term4-Jan2023\COMP4945\Assignment1\server\obj\Debug\net7.0\ref\server.dll
