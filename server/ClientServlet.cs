@@ -14,10 +14,7 @@ public class ClientServlet: Servlet
     
     public void DoGet(Response response, Request request)
     {
-        Console.WriteLine("Launching Client Servlet");
-        String welcome = Welcome_Message();
-        byte[] message = Encoding.ASCII.GetBytes(welcome);
-        response.WriteToStream(message); 
+
     }
 
     private static String Welcome_Message()

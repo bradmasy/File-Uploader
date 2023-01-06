@@ -27,8 +27,32 @@ namespace server
 
         public void DoGet(Response response, Request request)
         {
-            Byte[] responseStr = Encoding.UTF8.GetBytes(HOME);
-            response.WriteToStream(responseStr);
+
+            if (request.GetRequestMap()["User-Agent"].Equals("Browser"))
+            {
+                Byte[] responseStr = Encoding.UTF8.GetBytes(HOME);
+                response.WriteToStream(responseStr);
+            }
+            else
+            {
+                Console.WriteLine("Launching Client Servlet");
+                String welcome = Welcome_Message();
+                byte[] message = Encoding.ASCII.GetBytes(welcome);
+                response.WriteToStream(message);
+            }
+        }
+
+        private static String Welcome_Message()
+        {
+            StringBuilder builder = new StringBuilder();
+            builder.Append("Welcome To the Program, here are your options:\n");
+            builder.Append("1. Upload Photo\n");
+            builder.Append("2. Upload File\n");
+            builder.Append("3. Messenger Application\n");
+            builder.Append("4. Exit\n");
+            builder.Append("\n\0");
+
+            return builder.ToString();
         }
 
         public void SetClient(Socket client)

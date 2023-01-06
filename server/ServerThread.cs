@@ -54,21 +54,7 @@ class ServerThread : BaseThread
             Console.WriteLine(request);
             Response response = new Response(_client);
 
-            Servlet servlet;
-            
-
-            if (request.GetRequestMap()["User-Agent"].Equals("Browser"))
-            {
-                ConstructorInfo[] info = Type.GetType("server.UploadServlet").GetConstructors();
-                //   Console.WriteLine($" Constructor name: {info[0].Name}");
-                // servlet = info[0].Invoke(_client);
-                servlet = (UploadServlet)Activator.CreateInstance(typeof(UploadServlet), _client);
-            }
-            else
-            {
-                Console.WriteLine("initiating client servlet...");
-                servlet = (ClientServlet)Activator.CreateInstance(typeof(ClientServlet), _client);
-            }
+            Servlet servlet = this.servletFactory();
 
             servlet.SetClient(_client);
 
@@ -76,5 +62,10 @@ class ServerThread : BaseThread
         }
 
         _client.Close(); // close the client after the request has been processed.
+    }
+
+    public Servlet servletFactory(Request req) {
+        
+
     }
 }
