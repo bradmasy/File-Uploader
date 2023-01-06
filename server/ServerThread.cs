@@ -4,11 +4,16 @@ using System.Diagnostics.Tracing;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
+using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 using server;
 
 
 class ServerThread : BaseThread
 {
+
+    public const String HOME = "/";
 
     private Socket _client;
 
@@ -66,6 +71,22 @@ class ServerThread : BaseThread
 
     public Servlet ServletFactory(Request req, Socket _client) {
 
-        return new server.UploadServlet(_client);
+        string appPath = System.Reflection.Assembly.GetExecutingAssembly().Location; 
+        string curDir = Path.GetFullPath(appPath);
+        string dllName = "";
+
+        Servlet result = null;
+        switch (req.GetUrl()) {
+            case ServerThread.HOME:
+                dllName = "UploadServlet";
+                string dllPath = Path.Combine(curDir, dllName);
+                Assembly assembly = Assembly.LoadFile(dllPath);
+                Type temp = assembly.GetType("Server.UploadServlet");
+                return (Servlet)Activator.CreateInstance(temp);
+        }
+
+
+
+        return result;
     }
 }

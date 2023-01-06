@@ -1,9 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\client",
-    "\\server"
+    "\\server",
+    "\\server\\bin"
   ],
-  "SelectedNode": "\\server\\ClientServlet.cs",
+  "SelectedNode": "\\server\\UploadServlet.cs",
   "PreviewInSolutionExplorer": false
 }
