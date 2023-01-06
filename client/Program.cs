@@ -25,12 +25,6 @@ class Program
 
         string image_path = Console.ReadLine();
 
-       // String req = Build_Post_Request();
-
-       // byte[] message = Encoding.ASCII.GetBytes(req);
-
-//        client.GetStream().Write(message, 0, message.Length); // test message.
-
         return true;
 
     }
@@ -45,11 +39,19 @@ class Program
     private static bool Upload_File()
     {
       
+        Dictionary<String,String> data_to_send = new Dictionary<String,String>();
         bool continue_program = true;
         Console.WriteLine("Please input the path to the file you wish to upload:\n");
-
         string file_path = Console.ReadLine();
+        Console.WriteLine("Please input the caption of the file:\n");
+        string caption = Console.ReadLine();
+        Console.WriteLine("Please input the date (please use format: mm\\dd\\yyyy):\n");
+        string date = Console.ReadLine();
+        Console.WriteLine("Please input the keyword of the file:\n");
+        string keyword = Console.ReadLine();
+
         String data = "";
+        
         using(FileStream file =  File.OpenRead(file_path)){
             byte[] b = new byte[1024];
             UTF8Encoding temp = new UTF8Encoding(true);
@@ -58,17 +60,20 @@ class Program
             }
         };
         
-        Console.WriteLine($"file data: {data}");
-
-
-        String req = Build_Post_Request(TEXT_FILE, data);
+       // Console.WriteLine($"file data: {data}");
+        data_to_send.Add("caption", caption);
+        data_to_send.Add("date", date);
+        data_to_send.Add("keyword", keyword);
+        data_to_send.Add("file_path", file_path);
+        data_to_send.Add("content", data);
+        
+        String req = Build_Post_Request(TEXT_FILE, data_to_send);
         Console.WriteLine(req);
+
         byte[] message = Encoding.ASCII.GetBytes(req);
-                Client cl = new Client(PORT, HOST_IP);
+        Client cl = new Client(PORT, HOST_IP);
 
         cl.client_socket.Send(message);
-
-
         return continue_program;
     }
 
@@ -116,18 +121,18 @@ class Program
         builder.Append("User-Agent: CLI\n");       
         return builder.ToString();
     }
-    private static String Build_Post_Request(int data_type, String data )
+    private static String Build_Post_Request(int data_type, Dictionary<String,String> data_dictionary )
     {
         StringBuilder builder = new StringBuilder();
         String charset        = "UTF-8";
         String boundary       = Create_Boundary();
 
-        Console.WriteLine("Length of data: " + data.Length);
+        Console.WriteLine("Length of data: " + data_dictionary["content"].Length);
         builder.Append("POST / HTTP/1.1\r\n");
         builder.Append("Host: localhost:8000\n");
         builder.Append("User-Agent: CLI\n");
         builder.Append("Connection: keep-alive\n");
-        builder.Append($"Content-Length: {data.Length}\n");
+        builder.Append($"Content-Length: {data_dictionary["content"].Length}\n");
         builder.Append("Cache-Control: max-age=0\n");
         builder.Append("sec-ch-ua: \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"108\", \"Google Chrome\";v=\"108\"\n");
         builder.Append("sec-ch-ua-mobile: ?0\n");
@@ -147,12 +152,25 @@ class Program
         // this is where the multipart data is written.
         switch(data_type){
             case TEXT_FILE:
-              //  builder.Append("\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n");
                 builder.Append($"------WebKitFormBoundary{boundary}\n");
                 builder.Append($"Content-Disposition: form-data; name=\"fileName\"; filename=\"test.txt\"\n");
                 builder.Append($"Content-Type: text/plain\n\r\n");
                 //builder.Append("\r\n");
-                builder.Append(data);
+                builder.Append(data_dictionary["content"]);
+                
+                builder.Append($"\n------WebKitFormBoundary{boundary}\n");
+                builder.Append("Content-Disposition: form-data; name=\"caption\"\n\r");
+                builder.Append($"\n{data_dictionary["caption"]}\r\n");
+                
+                builder.Append($"------WebKitFormBoundary{boundary}\n");
+                builder.Append("Content-Disposition: form-data; name=\"keyword\"\n\r");
+                builder.Append($"\n{data_dictionary["keyword"]}\r\n");
+
+                builder.Append($"------WebKitFormBoundary{boundary}\n");
+                builder.Append("Content-Disposition: form-data; name=\"date\"\n\r");
+                builder.Append($"\n{data_dictionary["date"]}\r\n");
+
+                builder.Append($"------WebKitFormBoundary{boundary}\n");
                 break;
             
         }

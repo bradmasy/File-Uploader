@@ -118,11 +118,12 @@ public class Request
                 break;
             }
         }
+        
         Console.WriteLine("content is: " + contentType);
         d.Add("Content-Type", contentType);
 
         // adding the content to the dictionary.
-        MatchCollection contentBorders = Regex.Matches(line, START);
+       // MatchCollection contentBorders = Regex.Matches(line, START);
         Match startOfContent           = Regex.Match(line, START); // will find where the content starts
         Console.WriteLine($"start of content: {startOfContent.Index}");
         String content                 = line.Substring(startOfContent.Index + START.Length + 1 );
@@ -167,7 +168,7 @@ public class Request
              * this splits each chunk of multipart data, the first chunk will contain nothing, the second will contain the content
              * of the text file as well as the name, the third will contain the caption and the fourth will contain the date
              */
-            Console.WriteLine("current line: " + line);
+            Console.WriteLine($"current line:[{line}]");
 
             switch (i)
             {
@@ -299,6 +300,7 @@ public class Request
             {
                 String result = lines[i].Contains("GET") ? "Get" : "Post"; // this is the http GET or POST
                 request.Add("Request", result);
+                // traverse string to get the other value...
             } 
             else if (request["Request"].Equals("Post") && lines[i].Trim().Equals(_boundary))
             {

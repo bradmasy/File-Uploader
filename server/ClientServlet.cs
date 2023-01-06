@@ -36,6 +36,13 @@ public class ClientServlet: Servlet
     public void DoPost(Response response, Request request)
     {
         Console.WriteLine("---------------------REQUEST----------------------- \n" + request.ToString()); 
+
+        string content = request.GetMultiData()["Content"]; // gets all the data we need to write
+        string fileName = request.GetMultiData()["fileName"];
+        string path = Directory.GetCurrentDirectory() + "\\upload\\" + fileName; // file being created
+        File.WriteAllText(path, content); // data written to file
+
+        // write a file here from the request 
     }
 
     public void SetClient(Socket client)
