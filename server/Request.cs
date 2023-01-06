@@ -118,7 +118,7 @@ public class Request
                 break;
             }
         }
-        
+
         Console.WriteLine("content is: " + contentType);
         d.Add("Content-Type", contentType);
 
@@ -235,6 +235,7 @@ public class Request
             String path             = $"C:\\Users\\bradl\\Desktop\\C#\\Server-Project-1\\server\\upload\\{timestamp}-{filename}";
             StreamWriter fileWriter = new StreamWriter(path);
             Console.WriteLine($"File Type: {filedata["Content-Type"]}");
+            
             if (filedata["Content-Type"] == "image/png")
             {
                 byte[] imageBytes = Encoding.ASCII.GetBytes(filedata["Content"]);

@@ -38,7 +38,6 @@ namespace server
                 Byte[] responseStr = Encoding.UTF8.GetBytes(HOME);
                 response.WriteToStream(responseStr); // directory listing???
             }
-
         }
 
         public void DoPost(Response response, Request request)
