@@ -6,15 +6,15 @@ namespace server;
 
 public class Response
 {
-    private NetworkStream _stream;
-    public Response(NetworkStream stream)
+    private Socket _stream;
+    public Response(Socket stream)
     {
         _stream = stream;
     }
 
     public void WriteToStream(Byte[] response)
     {
-        _stream.Write(response, 0, response.Length);
+        _stream.Send(response);
     }
 
 

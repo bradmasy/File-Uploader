@@ -7,6 +7,7 @@ using System.IO;
 using System.Text;
 using System.Drawing;
 
+
 namespace server;
 
 public class Request
@@ -60,7 +61,7 @@ public class Request
         {
             if (content[0].Equals("User-Agent"))
             {
-                if (content[1].Trim() != "command line interface")
+                if (content[1].Trim() != "CLI")
                 {
                     content[1] = "Browser"; // identify the user agent as browser, we will tweak later.
                 }
@@ -69,11 +70,11 @@ public class Request
             else if(content[0].Equals("Content-Type")) // to get the boundary.
             {   
                     String[] splitContent = content[1].Split(";");
-                    _boundary = "------" + splitContent[1].Substring(OFFSET);
+                    _boundary = "------" + splitContent[1].Trim().Substring(OFFSET -1);
                     request.Add("Boundary", _boundary);
             }
 
-            Console.WriteLine($"adding key: {content[0]} and value: {content[1]}");
+           // Console.WriteLine($"adding key: {content[0]} and value: {content[1]}");
             request.Add(content[0].Trim(), content[1].Trim());
         }
     }
@@ -85,7 +86,7 @@ public class Request
     private void ContentData(String line, Dictionary<String,String> d)
     {
 
-       String[] CONTENT_VALUES = new String[2] { "text/plain", "image/jpeg" };
+       String[] CONTENT_VALUES = new String[3] { "text/plain", "image/jpeg","image/png" };
 
     // adding the name to the dictionary.
 
@@ -94,6 +95,7 @@ public class Request
         Match m                  = Regex.Match(line,patternName);
         MatchCollection sepMatch = Regex.Matches(line,patternSeparater);
         String key               =  line.Substring( (m.Index + patternName.Length + 1), (sepMatch[1].Index - m.Index - patternName.Length - 2));
+       Console.WriteLine($"KEY SHOULD BE FILE DATA: [{key}]");
         String patternFile       = "filename=";
         Match m1                 = Regex.Match(line, patternFile);
         String quoteSeparator    = "\""; // try to find a better thing here.
@@ -109,20 +111,21 @@ public class Request
         for(int i = 0; i < CONTENT_VALUES.Length; i++)
         {
             String each = CONTENT_VALUES[i];
-
+            Console.WriteLine($"each: {each}");
             if (Regex.IsMatch(line,each))
             {
                 contentType = CONTENT_VALUES[i];
                 break;
             }
         }
-
+        Console.WriteLine("content is: " + contentType);
         d.Add("Content-Type", contentType);
 
         // adding the content to the dictionary.
         MatchCollection contentBorders = Regex.Matches(line, START);
-        Match startOfContent = Regex.Match(line, START); // will find where the content starts
-        String content = line.Substring(startOfContent.Index + START.Length + 1 );
+        Match startOfContent           = Regex.Match(line, START); // will find where the content starts
+        String content                 = line.Substring(startOfContent.Index + START.Length + 1 );
+        Console.WriteLine($"Content:[{content}]");
         d.Add("Content", content.Substring(0,content.Length));
     }
 
@@ -132,7 +135,7 @@ public class Request
     private void CaptionData(String line, Dictionary<String, String> d)
     {
         Match captionStart = Regex.Match(line, START);
-        String caption = line.Substring(captionStart.Index + START.Length + 1);
+        String caption     = line.Substring(captionStart.Index + START.Length + 1);
         d.Add("Caption",caption.Substring(0, caption.Length - 2));
     }
 
@@ -143,6 +146,7 @@ public class Request
     {
         Match dateStart = Regex.Match(line, START);
         String date = line.Substring(dateStart.Index + START.Length + 1);
+        Console.WriteLine($"date: {date}");
         d.Add("Date", date.Substring(0,date.Length - 2));
     }
 
@@ -151,18 +155,20 @@ public class Request
      */
     private void ProcessMultipart(String MultipartData)
     {
-        Dictionary<String, String> MultipartDictionary = new Dictionary<String, String>();
 
-        String[] multiSplit = MultipartData.Split(_boundary);
+        Console.WriteLine($"MULTI:\n{MultipartData}");
+        Dictionary<String, String> MultipartDictionary = new Dictionary<String, String>();
+        String[] multiSplit                            = MultipartData.Split(_boundary);
 
         for (int i = 0; i < multiSplit.Length; i++)
         {
             String line = multiSplit[i];
 
             /*
-             * this splits each chunk of multipart data, the first chucnk will contain nothing, the second will contain the content
+             * this splits each chunk of multipart data, the first chunk will contain nothing, the second will contain the content
              * of the text file as well as the name, the third will contain the caption and the fourth will contain the date
              */
+            Console.WriteLine("current line: " + line);
 
             switch (i)
             {
@@ -178,10 +184,19 @@ public class Request
                 case TYPE:
                     _multipartData.Add("Type", "Submit"); // we know the type.
                     break;
-
+                default:
+                    break;
             }
-
         }
+
+        Console.WriteLine("AFTER SWITCH");
+
+        List<String> keys = new List<String>(MultipartDictionary.Keys); 
+        foreach(String k in keys){
+            Console.WriteLine($"M KEY: {k} | M VAL: {MultipartDictionary[k]}");
+        }
+
+        ReconstructFile(MultipartDictionary);
     }
 
     /**
@@ -191,6 +206,14 @@ public class Request
     {
         _status = status;
     }
+
+
+    public static String GetTimestamp(DateTime value)
+    {
+        return value.ToString("yyyyMMddHHmmssffff");
+    }
+
+
 
     /**
      * Reconstructs the file from the map.
@@ -207,19 +230,18 @@ public class Request
         try
         {
             String filename         = filedata["fileName"];
-            String path             = $".\\upload\\{filename}";
-            // $"C:\\Users\\bradl\\Desktop\\C#\\Server-Project-1\\server\\upload\\{filename}"
+          //  String date             = filedata["Date"];
+            String timestamp        = GetTimestamp(DateTime.Now);
+            String path             = $"C:\\Users\\bradl\\Desktop\\C#\\Server-Project-1\\server\\upload\\{timestamp}-{filename}";
             StreamWriter fileWriter = new StreamWriter(path);
-
-            if (filedata["Content-Type"] == "image/jpeg")
+            Console.WriteLine($"File Type: {filedata["Content-Type"]}");
+            if (filedata["Content-Type"] == "image/png")
             {
                 byte[] imageBytes = Encoding.ASCII.GetBytes(filedata["Content"]);
-                Console.WriteLine($"image bytes: {imageBytes.ToString}");
+             //   Console.WriteLine($"image bytes: {imageBytes.ToString}");
                 String converted = Convert.ToBase64String(imageBytes);
-                Console.WriteLine($"converted code: {converted}");
+                //  Console.WriteLine($"converted code: {converted}");
 
-                
-                
                 fileWriter.Write(converted);
                 fileWriter.Close();
                 SetStatus(OK);
@@ -279,8 +301,9 @@ public class Request
                 String result = lines[i].Contains("GET") ? "Get" : "Post"; // this is the http GET or POST
                 request.Add("Request", result);
             } 
-            else if (request["Request"].Equals("Post") && lines[i].Equals(_boundary))
+            else if (request["Request"].Equals("Post") && lines[i].Trim().Equals(_boundary))
             {
+                Console.WriteLine("breaking on boundary");
                 break;
             }
             else
@@ -291,6 +314,7 @@ public class Request
 
         }
 
+        Console.WriteLine($"\nWe have made it heren \n");
 
         if (request.ContainsKey("Request"))
         {
@@ -299,8 +323,11 @@ public class Request
 
             if (request.ContainsKey("Boundary"))
             {
+                Console.WriteLine("request size: " + type.Length);
+                Console.WriteLine("data size: "+ index);
+                Console.WriteLine("move this amount: " + (index +  type.Length));
                 String MultipartData = data.Substring(index + type.Length);
-
+                Console.WriteLine($"multipart: [{MultipartData}]");
                 ProcessMultipart(MultipartData);
             }
         }
@@ -326,8 +353,7 @@ public class Request
         
         foreach (var each in _requestData)
         {
-            description += "Key: " + each.Key + " | Val: " +each.Value +"\n";
-            
+            description += "Key: " + each.Key + " | Val: " + each.Value + "\n";
         }
 
         return description;
