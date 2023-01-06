@@ -54,7 +54,7 @@ class ServerThread : BaseThread
             Console.WriteLine(request);
             Response response = new Response(_client);
 
-            Servlet servlet = this.servletFactory();
+            Servlet servlet = this.ServletFactory(request, _client);
 
             servlet.SetClient(_client);
 
@@ -64,8 +64,8 @@ class ServerThread : BaseThread
         _client.Close(); // close the client after the request has been processed.
     }
 
-    public Servlet servletFactory(Request req) {
-        
+    public Servlet ServletFactory(Request req, Socket _client) {
 
+        return new server.UploadServlet(_client);
     }
 }

@@ -32,6 +32,7 @@ public class Request
     private String _boundary = "";
     private String _data;
     private int _status = ERROR;
+    private String url = "/";
    
     public Request(String data)
     {
@@ -300,6 +301,8 @@ public class Request
             {
                 String result = lines[i].Contains("GET") ? "Get" : "Post"; // this is the http GET or POST
                 request.Add("Request", result);
+                // This isolates and sets the URL
+                this.url = lines[i].Split(" ")[1];
             } 
             else if (request["Request"].Equals("Post") && lines[i].Trim().Equals(_boundary))
             {
@@ -342,6 +345,11 @@ public class Request
     public Dictionary<String, String> GetRequestMap()
     {
         return _requestData;
+    }
+
+    public String GetUrl() 
+    {
+        return this.url;
     }
 
     /**
