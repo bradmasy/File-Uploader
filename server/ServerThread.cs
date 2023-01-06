@@ -39,8 +39,13 @@ class ServerThread : BaseThread
     {
         Console.WriteLine("Thread running...");
 
+        // implement new read method
+
         byte[] buffer      = new byte[_client.Available];
         int bytes_recieved = _client.Receive(buffer);
+
+        String path             =  Directory.GetCurrentDirectory() + $"\\upload\\temp.txt";
+        File.WriteAllBytes(path, buffer);
 
         // keep looping until all data is recieved
 

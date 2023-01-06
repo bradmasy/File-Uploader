@@ -126,9 +126,21 @@ public class Request
        // MatchCollection contentBorders = Regex.Matches(line, START);
         Match startOfContent           = Regex.Match(line, START); // will find where the content starts
         Console.WriteLine($"start of content: {startOfContent.Index}");
-        String content                 = line.Substring(startOfContent.Index + START.Length + 1 );
+        String content                 = line.Substring(startOfContent.Index + START.Length + 1 ); // gets all the content
         Console.WriteLine($"Content:[{content}]");
         d.Add("Content", content.Substring(0,content.Length));
+
+
+
+
+
+
+
+
+        //   byte[] testb = Encoding.ASCII.GetBytes(content);
+        //     string path2 = Directory.GetCurrentDirectory() + $"\\upload\\thisisatest.png"; // file being created
+        //     File.WriteAllBytes(path2, testb);
+        //      Console.WriteLine("TESTING TESTING");
     }
 
     /**
@@ -214,6 +226,28 @@ public class Request
 
 
 
+
+
+
+public void SaveImage()
+{
+    string strm = "R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"; 
+
+    //this is a simple white background image
+    var myfilename= string.Format(@"{0}", Guid.NewGuid());
+
+    //Generate unique filename
+    string filepath= "~/UserImages/" + myfilename+ ".jpeg";
+    var bytess = Convert.FromBase64String(strm);
+    using (var imageFile = new FileStream(filepath, FileMode.Create))
+    {
+        imageFile.Write(bytess, 0, bytess.Length);
+        imageFile.Flush();
+    }
+}
+
+
+
     /**
      * Reconstructs the file from the map.
      */
@@ -232,10 +266,60 @@ public class Request
             Console.WriteLine($"File Name: {filename}");
           //  String date             = filedata["Date"];
             String timestamp        = GetTimestamp(DateTime.Now);
-            String path             = $"C:\\Users\\bradl\\Desktop\\C#\\Server-Project-1\\server\\upload\\{timestamp}-{filename}";
+            // String path             = $"C:\\Users\\bradl\\Desktop\\C#\\Server-Project-1\\server\\upload\\{timestamp}-{filename}";
+            String path             =  Directory.GetCurrentDirectory() + $"\\upload\\{timestamp}-{filename}";
             StreamWriter fileWriter = new StreamWriter(path);
             Console.WriteLine($"File Type: {filedata["Content-Type"]}");
+
+
+            byte[] testb = Encoding.ASCII.GetBytes(filedata["Content"]); //------------------------
+            //   byte[] testb = Encoding.Unicode.GetBytes(filedata["Content"]); //------------------------
+             String testc = Convert.ToBase64String(testb);
+            Console.WriteLine("TESTING TESTING");
+            Console.WriteLine("BYTECODE LENGTH: "  + filedata["Content"].Length);
+            Console.WriteLine("BASE64 LENGTH: "  + testc.Length);
+            string path2 = Directory.GetCurrentDirectory() + $"\\upload\\thisisatest3.txt"; // file being created
+            // string s = testb.ToString();
+            File.WriteAllText(path2, testc);
+            // File.WriteAllText(path2, s);
+
+            // File.WriteAllBytes(path2, testb);
+
+            // MemoryStream ms = new MemoryStream(testb);
+            //  FileStream file = new FileStream(path2, FileMode.Create, FileAccess.Write);
+            // ms.WriteTo(file);
+            // file.Close();
+            // ms.Close();
+
             
+            string path3 = Directory.GetCurrentDirectory() + $"\\upload\\thisisatest4.png"; // file being created
+            // string s = testb.ToString();
+            File.WriteAllBytes(path3, testb);
+
+
+            string output = Convert.ToInt32(testb).ToString();
+            File.WriteAllText(Directory.GetCurrentDirectory() + $"\\upload\\thisisatest4.txt", output);
+
+
+
+            String dirPath = Directory.GetCurrentDirectory() + $"\\upload\\"; 
+            String imgName = "my_image_name.bmp";
+
+            byte[] imgByteArray = Convert.FromBase64String(testc);
+             File.WriteAllBytes(dirPath + imgName, testb);
+            // File.WriteAllBytes(dirPath + imgName, imgByteArray);
+
+
+
+
+
+
+
+
+
+
+ 
+
             if (filedata["Content-Type"] == "image/png")
             {
                 byte[] imageBytes = Encoding.ASCII.GetBytes(filedata["Content"]);

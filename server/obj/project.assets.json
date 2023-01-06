@@ -8,24 +8,19 @@
     "net7.0": []
   },
   "packageFolders": {
-    "C:\\Users\\bradl\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\m\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\bradl\\Desktop\\C#\\Server-Project-1\\server\\server.csproj",
+      "projectUniqueName": "C:\\Users\\m\\Documents\\Monica\\BCIT Courses\\Level 4\\Client Server\\Distributed Software Arch (4945)\\Assignment 1\\c--server\\server\\server.csproj",
       "projectName": "server",
-      "projectPath": "C:\\Users\\bradl\\Desktop\\C#\\Server-Project-1\\server\\server.csproj",
-      "packagesPath": "C:\\Users\\bradl\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\bradl\\Desktop\\C#\\Server-Project-1\\server\\obj\\",
+      "projectPath": "C:\\Users\\m\\Documents\\Monica\\BCIT Courses\\Level 4\\Client Server\\Distributed Software Arch (4945)\\Assignment 1\\c--server\\server\\server.csproj",
+      "packagesPath": "C:\\Users\\m\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\m\\Documents\\Monica\\BCIT Courses\\Level 4\\Client Server\\Distributed Software Arch (4945)\\Assignment 1\\c--server\\server\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\bradl\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Users\\m\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -33,7 +28,6 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
