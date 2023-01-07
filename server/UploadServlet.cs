@@ -28,6 +28,7 @@ namespace server
             _client = client;
         }
 
+        
         private void ProcessPostRequest(Response response, Request request)
         {
             int responseCode = request.ReconstructFile(request.GetMultiData());
@@ -39,7 +40,7 @@ namespace server
                 response.WriteToStream(responseStr); // directory listing???
             }
         }
-
+        
         public void DoPost(Response response, Request request)
         {
             Console.WriteLine($"Post request: {request}");
