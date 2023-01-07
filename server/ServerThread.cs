@@ -67,20 +67,22 @@ class ServerThread : BaseThread
         string end_pattern   = "\r\n\r\n";
         string incoming_data = Read_Incoming_Transmission(end_pattern);
       
-        Console.WriteLine($"[{incoming_data}]");
+        //Console.WriteLine($"[{incoming_data}]");
 
         Request request   = new Request(incoming_data);
         Response response = new Response(_client);
 
         if (request.GetRequestMap()["Request"] == "POST")
         {
-            Console.WriteLine("here------");
-            string boundary  =  @"\w*------WebKitFormBoundary\w*[a-zA-Z0-9]{16}[-]{2}";
-
+            string boundary  = request._requestData["Boundary"] + "--";//@"\w*------WebKitFormBoundary\w*[a-zA-Z0-9]{16}[-]{2}"; // regex for the boundary, specifically the last boundary of the incoming data.
             string multipart = Read_Incoming_Transmission(boundary);
-            Console.WriteLine($"[{multipart}]");
-            Console.WriteLine("AFTER HERE");
+           
+            request.Parse_Multipart_Data(multipart); // call to process the multipart data.
         }
+
+
+
+
 
 
         Servlet servlet;
@@ -98,9 +100,7 @@ class ServerThread : BaseThread
         servlet.SetClient(_client);
 
         HandleRequest(request, response, servlet);
-    
-
-
+        Console.WriteLine("Ending of thread");
         _client.Close(); // close the client after the request has been processed.
     }
 }

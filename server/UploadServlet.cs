@@ -31,11 +31,9 @@ namespace server
         
         private void ProcessPostRequest(Response response, Request request)
         {
-            int responseCode = request.ReconstructFile(request.GetMultiData());
-            Console.WriteLine($"response code: {responseCode}");
-
-            if (responseCode == 200)
-            {
+            Console.WriteLine("Status: " + request._status);
+           if (request._status == 200)
+           {
                 Byte[] responseStr = Encoding.UTF8.GetBytes(HOME);
                 response.WriteToStream(responseStr); // directory listing???
             }
