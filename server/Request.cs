@@ -74,7 +74,11 @@ public class Request
 
             if (Regex.IsMatch(split_request_line[0].Trim(), "User-Agent"))
             {
-                value = "Browser";
+                if (value != "CLI")
+                {
+                    value = "Browser";
+
+                }
             }
 
             if (Regex.IsMatch(split_request_line[0], "Content-Type"))
@@ -127,23 +131,24 @@ public class Request
     {
         String[] split_content_disposition = data.Split(";");
         String[] filename_info = split_content_disposition[FILENAME_INDEX].Split("=");
-        string filename_value  = filename_info[FILENAME_VALUE].Substring(1, filename_info[FILENAME_VALUE].Length - 2);  // name of the file
+        string filename_value = filename_info[FILENAME_VALUE].Substring(1, filename_info[FILENAME_VALUE].Length - 2);  // name of the file
         multipart_dictionary.Add("Filename", filename_value);
     }
 
     private void Parse_Content_Data(string data, Dictionary<String, String> multipart_dictionary)
     {
-        String[] split_data = data.Split(START); 
+        String[] split_data = data.Split(START);
 
         for (int i = 0; i < split_data.Length; i++)
         {
-            switch(i){
+            switch (i)
+            {
                 case CONTENT_DISPOSITION:
-                // Content disposition
+                    // Content disposition
                     Parse_Content_Disposition_Data(split_data[i], multipart_dictionary);
                     break;
                 case CONTENT_TYPE:
-                // Content type
+                    // Content type
                     Parse_Content_Type_Data(split_data[i], multipart_dictionary);
                     break;
             }
@@ -156,7 +161,7 @@ public class Request
 
         for (int i = 0; i < split_chunk.Length; i++)
         {
-           // Console.WriteLine($"each line: [{split_chunk[i]}]");
+            // Console.WriteLine($"each line: [{split_chunk[i]}]");
 
             switch (i)
             {
@@ -189,28 +194,35 @@ public class Request
         multipart_dictionary.Add("Date", split_chunk[CAPTION_DATA]);
     }
 
-    private int Create_File() {
-            String filename         = _multipartData["Filename"];
-            String timestamp        = GetTimestamp(DateTime.Now);
-            String path             =  Directory.GetCurrentDirectory() + $"\\upload\\{timestamp}-{filename}";
-            
-            if (_multipartData["Content-Type"] == "image/png")
-            {
-                byte[] imageBytes = Encoding.UTF8.GetBytes(_multipartData["Content"]); // gets actual content
-                File.WriteAllBytes(path, imageBytes); // write to file
-                SetStatus(OK);
+    private int Create_File()
+    {
+        String filename = _multipartData["Filename"];
+        String timestamp = GetTimestamp(DateTime.Now);
+        String path = Directory.GetCurrentDirectory() + $"\\upload\\{timestamp}-{filename}";
 
-            } else if (_multipartData["Content-Type"] == "text/plain")
-            {
-                File.WriteAllText(path, _multipartData["Content"]);
-                SetStatus(OK); // set the status to 200 after a proper upload.
-            } else {
-                SetStatus(ERROR);
-                return ERROR;
-            }
+        if (_multipartData["Content-Type"] == "image/png")
+        {
+            //Console.WriteLine($"is little endian: {BitConverter.IsLittleEndian}");
 
-            Console.WriteLine("WROTE TO FILE");
-            return OK;
+            byte[] imageBytes = Encoding.UTF8.GetBytes(_multipartData["Content"]); // gets actual content
+            string imageBase64 = Convert.ToBase64String(imageBytes);
+            // File.WriteAllBytes(path, imageBytes); // write to file
+            File.WriteAllText(path, imageBase64);
+            SetStatus(OK);
+        }
+        else if (_multipartData["Content-Type"] == "text/plain")
+        {
+            File.WriteAllText(path, _multipartData["Content"]);
+            SetStatus(OK); // set the status to 200 after a proper upload.
+        }
+        else
+        {
+            SetStatus(ERROR);
+            return ERROR;
+        }
+
+        Console.WriteLine("WROTE TO FILE");
+        return OK;
     }
 
 
@@ -250,336 +262,36 @@ public class Request
 
         Create_File();
 
-        
-         List<String> keys = new List<String>(_multipartData.Keys);
-
-            foreach (String key in keys)
-            {
-                Console.WriteLine($"multi Key: [{key}] multi Value: [{_multipartData[key]}]");
-            }
-
-
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    private void ProcessLines(String line, Dictionary<String, String> request)
-    {
-        String[] content = line.Split(":");
-
-        if (content.Length > MIN_LEN) // if there is something to split.
-        {
-            if (content[0].Equals("User-Agent"))
-            {
-                if (content[1].Trim() != "CLI")
-                {
-                    content[1] = "Browser"; // identify the user agent as browser, we will tweak later.
-                }
-
-            }
-            else if (content[0].Equals("Content-Type")) // to get the boundary.
-            {
-                String[] splitContent = content[1].Split(";");
-                _boundary = "------" + splitContent[1].Trim().Substring(OFFSET - 1);
-                request.Add("Boundary", _boundary);
-            }
-
-            // Console.WriteLine($"adding key: {content[0]} and value: {content[1]}");
-            request.Add(content[0].Trim(), content[1].Trim());
-        }
-    }
-
-
-
-    private void ContentData(String line, Dictionary<String, String> d)
-    {
-
-        String[] CONTENT_VALUES = new String[3] { "text/plain", "image/jpeg", "image/png" };
-
-        // adding the name to the dictionary.
-
-        String patternName = "name=";
-        String patternSeparater = ";";
-        Match m = Regex.Match(line, patternName);
-        MatchCollection sepMatch = Regex.Matches(line, patternSeparater);
-        String key = line.Substring((m.Index + patternName.Length + 1), (sepMatch[1].Index - m.Index - patternName.Length - 2));
-        String patternFile = "filename=";
-        Match m1 = Regex.Match(line, patternFile);
-        String quoteSeparator = "\""; // try to find a better thing here.
-        MatchCollection quotes = Regex.Matches(line, quoteSeparator);
-        String value = line.Substring((m1.Index + patternFile.Length + 1), (quotes[3].Index - m1.Index - patternFile.Length - 1));
-        //  Console.WriteLine($"file name value: {value}");
-        d.Add(key, value);
-
-        // adding the content type.
-
-        String contentType = "";
-
-        for (int i = 0; i < CONTENT_VALUES.Length; i++)
-        {
-            String each = CONTENT_VALUES[i];
-            //Console.WriteLine($"each: {each}");
-            if (Regex.IsMatch(line, each))
-            {
-                contentType = CONTENT_VALUES[i];
-                break;
-            }
-        }
-
-        // Console.WriteLine("content is: " + contentType);
-        d.Add("Content-Type", contentType);
-
-        // adding the content to the dictionary.
-        // MatchCollection contentBorders = Regex.Matches(line, START);
-        Match startOfContent = Regex.Match(line, START); // will find where the content starts
-        Console.WriteLine($"start of content: {startOfContent.Index}");
-        String content = line.Substring(startOfContent.Index + START.Length + 1);
-        // Console.WriteLine($"Content:[{content}]");
-        d.Add("Content", content.Substring(0, content.Length));
-        // Console.WriteLine("CONTENT LENGTH: " + content.Length);
-        byte[] newB = Encoding.ASCII.GetBytes(content);
-        string b = Convert.ToBase64String(newB);
-        //Console.WriteLine($"base 64: [{b}]");
-    }
-
-
-
-    private void CaptionData(String line, Dictionary<String, String> d)
-    {
-        Match captionStart = Regex.Match(line, START);
-        String caption = line.Substring(captionStart.Index + START.Length + 1);
-        d.Add("Caption", caption.Substring(0, caption.Length - 2));
-    }
-
-    private void DateData(String line, Dictionary<String, String> d)
-    {
-        Match dateStart = Regex.Match(line, START);
-        String date = line.Substring(dateStart.Index + START.Length + 1);
-        // Console.WriteLine($"date: {date}");
-        d.Add("Date", date.Substring(0, date.Length - 2));
-    }
-
-
-    private void ProcessMultipart(String MultipartData)
-    {
-
-        String[] multiSplit = MultipartData.Split(_boundary);
-
-        for (int i = 0; i < multiSplit.Length; i++)
-        {
-            String line = multiSplit[i];
-
-
-            Console.WriteLine($"current line:[{line}]");
-
-            switch (i)
-            {
-                case CONTENT:
-                    ContentData(line, _multipartData);
-                    break;
-                case CAPTION:
-                    CaptionData(line, _multipartData);
-                    break;
-                case DATE:
-                    DateData(line, _multipartData);
-                    break;
-                case TYPE:
-                    _multipartData.Add("Type", "Submit"); // we know the type.
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        // Console.WriteLine("AFTER SWITCH");
 
         List<String> keys = new List<String>(_multipartData.Keys);
-        foreach (String k in keys)
+
+        foreach (String key in keys)
         {
-            // Console.WriteLine($"M KEY: {k} | M VAL: {_multipartData[k]}");
+            Console.WriteLine($"multi Key: [{key}] multi Value: [{_multipartData[key]}]");
         }
 
-    }
 
+    }
 
     private void SetStatus(int status)
     {
         _status = status;
     }
 
-
     public static String GetTimestamp(DateTime value)
     {
         return value.ToString("yyyyMMddHHmmssffff");
     }
-
-
-
-
-    public int ReconstructFile(Dictionary<String, String> filedata)
-    {
-        List<String> keys = new List<String>(filedata.Keys);
-        Console.WriteLine("ALL KEYS IN MULTIPART");
-        foreach (String key in keys)
-        {
-            //  Console.WriteLine("Key: [" + key + "] Value: [" + filedata[key] + "]");
-        }
-
-        try
-        {
-            String filename = filedata["fileName"];
-            Console.WriteLine($"File Name: {filename}");
-            //  String date             = filedata["Date"];
-            String timestamp = GetTimestamp(DateTime.Now);
-            String path = $"C:\\Users\\bradl\\Desktop\\C#\\Server-Project-1\\server\\upload\\{timestamp}-{filename}";
-            StreamWriter fileWriter = new StreamWriter(path);
-            Console.WriteLine($"File Type: {filedata["Content-Type"]}");
-
-            if (filedata["Content-Type"] == "image/png")
-            {
-                // byte[] imageBytes = Encoding.ASCII.GetBytes(filedata["Content"]);
-                byte[] imageBytes = Encoding.UTF8.GetBytes(filedata["Content"]);
-
-
-                //   Console.WriteLine($"image bytes: {imageBytes.ToString}");
-                string converted = Convert.ToBase64String(imageBytes);
-                //  Console.WriteLine($"converted code: {converted}");
-
-                fileWriter.Write(converted);
-                fileWriter.Close();
-                SetStatus(OK);
-
-            }
-            else if (filedata["Content-Type"] == "text/plain")
-            {
-                fileWriter.Write(filedata["Content"]);
-                fileWriter.Close();
-                SetStatus(OK); // set the status to 200 after a proper upload.
-            }
-            else
-            {
-                SetStatus(ERROR);
-            }
-
-
-        }
-        catch (Exception e)
-        {
-            SetStatus(ERROR);
-            Console.WriteLine(e.Message);
-        }
-
-        return _status;
-
-    }
-
 
     public Dictionary<String, String> GetMultiData()
     {
         return _multipartData;
     }
 
-
     public int GetStatus()
     {
         return _status;
     }
-
-
-    private Dictionary<String, String> ParseRequest(String data)
-    {
-        Dictionary<String, String> request = new Dictionary<string, string>();
-        String[] lines = data.Split("\r\n");
-
-        int index = 0;
-
-        for (var i = 0; i < lines.Length; i++)
-        {
-            Console.WriteLine($"LINE: {lines[i]}");
-
-            if (i == 0)
-            {
-                String result = lines[i].Contains("GET") ? "Get" : "Post"; // this is the http GET or POST
-                request.Add("Request", result);
-                // traverse string to get the other value...
-            }
-            else if (request["Request"].Equals("Post") && lines[i].Trim().Equals(_boundary))
-            {
-                Console.WriteLine("breaking on boundary");
-                break;
-            }
-            else
-            {
-                ProcessLines(lines[i], request);
-            }
-            index += lines[i].Length;
-
-        }
-
-
-
-        if (request.ContainsKey("Request"))
-        {
-            string type = request["Request"] + " / HTTP / 1.1";
-
-
-            if (request.ContainsKey("Boundary"))
-            {
-                Console.WriteLine("request size: " + type.Length);
-                Console.WriteLine("data size: " + index);
-                Console.WriteLine("move this amount: " + (index + type.Length));
-                String MultipartData = data.Substring(index + type.Length);
-                Console.WriteLine($"multipart: [{MultipartData}]");
-                ProcessMultipart(MultipartData);
-            }
-        }
-
-
-        return request;
-    }
-
 
     public Dictionary<String, String> GetRequestMap()
     {
@@ -587,16 +299,15 @@ public class Request
     }
 
 
-    // public override string ToString()
-    // {
-    //     String description = "";
+    public override string ToString()
+    {
+        String description = "";
 
-    //     foreach (var each in _requestData)
-    //     {
-    //         description += "Key: " + each.Key + " | Val: " + each.Value + "\n";
-    //     }
+        foreach (var each in _requestData)
+        {
+            description += "Key: " + each.Key + " | Val: " + each.Value + "\n";
+        }
 
-    //     return description;
-    // }
-
+        return description;
+    }
 }

@@ -14,18 +14,31 @@ class Program
 
     private const string HOST = "localhost";
     private const string HOST_IP = "127.0.0.1";
-    private const int PORT    = 8000;
+    private const int PORT = 8000;
     private const int TEXT_FILE = 1;
+    private const int IMAGE_FILE = 2;
 
 
 
-    private static bool Upload_Photo(Socket client)
+    private static bool Upload_Photo()
     {
-        Console.WriteLine("Please input the path to the image you wish to upload:\n");
 
-        string image_path = Console.ReadLine();
+        bool continue_program = true;
 
-        return true;
+        Dictionary<String, String> data_to_send = Get_User_Input("image");
+
+        Console.WriteLine($"photo bytes: [{data_to_send["Content"]}]");
+        String req = Build_Post_Request(IMAGE_FILE, data_to_send);
+
+        Console.WriteLine(req);
+
+        byte[] message = Encoding.ASCII.GetBytes(req);
+        Client cl = new Client(PORT, HOST_IP);
+
+        cl.client_socket.Send(message);
+        cl.client_socket.Close();
+
+        return continue_program;
 
     }
 
@@ -36,63 +49,92 @@ class Program
         return builder.ToString();
     }
 
+
+  private static string Read_Incoming_Transmission(Client c,string end_pattern)
+    {
+        byte[] incoming_bytes = new byte[1]; // single byte
+        string incoming_data = "";
+
+        while (true)
+        {
+            c.client_socket.Receive(incoming_bytes, 1, 0);
+
+            incoming_data += Encoding.ASCII.GetString(incoming_bytes);
+
+            if (Regex.IsMatch(incoming_data, end_pattern))
+            {
+                break;
+            }
+        }
+
+        return incoming_data;
+    }
+   
     private static bool Upload_File()
     {
-      
-        Dictionary<String,String> data_to_send = new Dictionary<String,String>();
         bool continue_program = true;
-        Console.WriteLine("Please input the path to the file you wish to upload:\n");
-        string file_path = Console.ReadLine();
-        Console.WriteLine("Please input the caption of the file:\n");
-        string caption = Console.ReadLine();
-        Console.WriteLine("Please input the date (please use format: mm\\dd\\yyyy):\n");
-        string date = Console.ReadLine();
-        Console.WriteLine("Please input the keyword of the file:\n");
-        string keyword = Console.ReadLine();
+        Dictionary<String, String> data_to_send = Get_User_Input("file");
 
-        String data = "";
-        
-        using(FileStream file =  File.OpenRead(file_path)){
-            byte[] b = new byte[1024];
-            UTF8Encoding temp = new UTF8Encoding(true);
-            while(file.Read(b,0, b.Length) > 0){
-                data += temp.GetString(b);
-            }
-        };
-        
-       // Console.WriteLine($"file data: {data}");
-        data_to_send.Add("caption", caption);
-        data_to_send.Add("date", date);
-        data_to_send.Add("keyword", keyword);
-        data_to_send.Add("file_path", file_path);
-        data_to_send.Add("content", data);
-        
         String req = Build_Post_Request(TEXT_FILE, data_to_send);
-        Console.WriteLine(req);
-
         byte[] message = Encoding.ASCII.GetBytes(req);
         Client cl = new Client(PORT, HOST_IP);
 
         cl.client_socket.Send(message);
+
+
+        string incoming_data = Read_Incoming_Transmission(cl, "\r\n");
+        Console.WriteLine($"Current Files Uploaded on Server...\n{incoming_data}");
+        
+
+        cl.client_socket.Close();
+
         return continue_program;
     }
 
+
+    private static Dictionary<String, String> Get_User_Input(string inputType)
+    {
+        Dictionary<String, String> data_to_send = new Dictionary<String, String>();
+        Console.WriteLine($"Please input the path to the {inputType} you wish to upload:\n");
+        string file_path = Console.ReadLine();
+        Console.WriteLine($"Please input the caption of the {inputType}:\n");
+        string caption = Console.ReadLine();
+        Console.WriteLine("Please input the date (please use format: mm\\dd\\yyyy):\n");
+        string date = Console.ReadLine();
+        string data = File.ReadAllText(file_path);
+        String[] file_path_split = file_path.Split("\\");
+        string file_name = file_path_split[file_path_split.Length - 1];
+
+        data_to_send.Add("Caption", caption);
+        data_to_send.Add("Date", date);
+        data_to_send.Add("File_Path", file_path);
+        data_to_send.Add("Filename", file_name);
+        data_to_send.Add("Content", data);
+        data_to_send.Add("Type", "Submit");
+
+        return data_to_send;
+    }
+
+
+  
     private static bool Launch_Application()
     {
         bool continue_program = true;
-        string input          = Console.ReadLine();
-        string input_regex    = @"^[1-4]$"; // match for only 1 number from 1 - 4
-        bool m                = Regex.IsMatch(input, input_regex);
+        string input = Console.ReadLine();
+        string input_regex = @"^[1-4]$"; // match for only 1 number from 1 - 4
+        bool m = Regex.IsMatch(input, input_regex);
 
         if (m)
         {
             switch (int.Parse(input))
             {
                 case 1:
-                     // continue_program = Upload_Photo(cl);
+                    continue_program = Upload_Photo();
+                    Console.WriteLine("\nImage uploaded successfully.\n");
                     break;
                 case 2:
                     continue_program = Upload_File();
+                    Console.WriteLine("\n\tFile uploaded successfully.\n");
                     break;
                 case 3:
                     break;
@@ -109,126 +151,89 @@ class Program
     {
         StringBuilder builder = new StringBuilder();
         builder.Append("syTrWiNhk1fONdsm");
-        return builder.ToString() ;
+        return builder.ToString();
     }
 
     private static String Build_Get_Request()
     {
-        StringBuilder builder = new StringBuilder() ;
+        StringBuilder builder = new StringBuilder();
         builder.Append("GET / HTTP/1.1\n");
         builder.Append("Host: localhost:8000\n");
         builder.Append("Connection: keep-alive\n");
-        builder.Append("User-Agent: CLI\n");       
+        builder.Append("User-Agent: CLI\n");
         return builder.ToString();
     }
-    private static String Build_Post_Request(int data_type, Dictionary<String,String> data_dictionary )
+
+
+
+
+    private static string Build_File(string boundary, Dictionary<String, String> data_dictionary, string contentType)
     {
         StringBuilder builder = new StringBuilder();
-        String charset        = "UTF-8";
-        String boundary       = Create_Boundary();
+        builder.Append($"------WebKitFormBoundary{boundary}\r\n");
+        builder.Append($"Content-Disposition: form-data; name=\"fileName\"; filename=\"{data_dictionary["Filename"]}\"\r\n");
+        builder.Append($"Content-Type: {contentType}\r\n\r\n");
+        builder.Append(data_dictionary["Content"]);
 
-        Console.WriteLine("Length of data: " + data_dictionary["content"].Length);
+        // the text file caption data.
+        builder.Append($"\r\n------WebKitFormBoundary{boundary}\r\n");
+        builder.Append("Content-Disposition: form-data; name=\"caption\"\r\n\r\n");
+        builder.Append($"{data_dictionary["Caption"]}");
+
+        // the text file date.
+        builder.Append($"\r\n------WebKitFormBoundary{boundary}\r\n");
+        builder.Append("Content-Disposition: form-data; name=\"date\"\r\n\r\n");
+        builder.Append($"{data_dictionary["Date"]}");
+
+        // the text file submit type.
+        builder.Append($"\r\n------WebKitFormBoundary{boundary}\r\n");
+        builder.Append("Content-Disposition: form-data; name=\"submit\"\r\n\r\n");
+        builder.Append($"{data_dictionary["Type"]}");
+
+        builder.Append($"\r\n------WebKitFormBoundary{boundary}--\r\n");
+
+        return builder.ToString();
+    }
+    private static String Build_Post_Request(int data_type, Dictionary<String, String> data_dictionary)
+    {
+        StringBuilder builder = new StringBuilder();
+        String boundary = Create_Boundary();
+
         builder.Append("POST / HTTP/1.1\r\n");
-        builder.Append("Host: localhost:8000\n");
-        builder.Append("User-Agent: CLI\n");
-        builder.Append("Connection: keep-alive\n");
-        builder.Append($"Content-Length: {data_dictionary["content"].Length}\n");
-        builder.Append("Cache-Control: max-age=0\n");
-        builder.Append("sec-ch-ua: \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"108\", \"Google Chrome\";v=\"108\"\n");
-        builder.Append("sec-ch-ua-mobile: ?0\n");
-        builder.Append("sec-ch-ua-platform: \"Windows\"\n");
-        builder.Append("Upgrade-Insecure-Requests: 1\n");
-        builder.Append("Origin: http://localhost:8000\n");
-        builder.Append($"Content-Type: multipart/form-data; boundary=----WebKitFormBoundary{boundary}\n");
-        builder.Append("Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9\n");
-        builder.Append("Sec-Fetch-Site: same-origin\n");
-        builder.Append("Sec-Fetch-Mode: navigate\n");
-        builder.Append("Sec-Fetch-User: ?1\n");
-        builder.Append("Sec-Fetch-Dest: document\n");
-        builder.Append("Referer: local\n");
-        builder.Append("Accept-Encoding: gzip, deflate, br\n");
+        builder.Append("Host: localhost:8000\r\n");
+        builder.Append("User-Agent: CLI\r\n");
+        builder.Append("Connection: keep-alive\r\n");
+        builder.Append($"Content-Length: {data_dictionary["Content"].Length}\r\n");
+        builder.Append("Cache-Control: max-age=0\r\n");
+        builder.Append("sec-ch-ua: \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"108\", \"Google Chrome\";v=\"108\"\r\n");
+        builder.Append("sec-ch-ua-mobile: ?0\r\n");
+        builder.Append("sec-ch-ua-platform: \"Windows\"\r\n");
+        builder.Append("Upgrade-Insecure-Requests: 1\r\n");
+        builder.Append("Origin: http://localhost:8000\r\n");
+        builder.Append($"Content-Type: multipart/form-data; boundary=----WebKitFormBoundary{boundary}\r\n");
+        builder.Append("Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9\r\n");
+        builder.Append("Sec-Fetch-Site: same-origin\r\n");
+        builder.Append("Sec-Fetch-Mode: navigate\r\n");
+        builder.Append("Sec-Fetch-User: ?1\r\n");
+        builder.Append("Sec-Fetch-Dest: document\r\n");
+        builder.Append("Referer: local\r\n");
+        builder.Append("Accept-Encoding: gzip, deflate, br\r\n");
         builder.Append("Accept-Language: en-US,en;q=0.9\r\n\r\n");
-  
+
         // this is where the multipart data is written.
-        switch(data_type){
+        switch (data_type)
+        {
             case TEXT_FILE:
-                builder.Append($"------WebKitFormBoundary{boundary}\n");
-                builder.Append($"Content-Disposition: form-data; name=\"fileName\"; filename=\"test.txt\"\n");
-                builder.Append($"Content-Type: text/plain\n\r\n");
-                //builder.Append("\r\n");
-                builder.Append(data_dictionary["content"]);
-                
-                builder.Append($"\n------WebKitFormBoundary{boundary}\n");
-                builder.Append("Content-Disposition: form-data; name=\"caption\"\n\r");
-                builder.Append($"\n{data_dictionary["caption"]}\r\n");
-                
-                builder.Append($"------WebKitFormBoundary{boundary}\n");
-                builder.Append("Content-Disposition: form-data; name=\"keyword\"\n\r");
-                builder.Append($"\n{data_dictionary["keyword"]}\r\n");
-
-                builder.Append($"------WebKitFormBoundary{boundary}\n");
-                builder.Append("Content-Disposition: form-data; name=\"date\"\n\r");
-                builder.Append($"\n{data_dictionary["date"]}\r\n");
-
-                builder.Append($"------WebKitFormBoundary{boundary}\n");
+                // the text file content.
+                builder.Append(Build_File(boundary, data_dictionary, "text/plain"));
                 break;
-            
+            case IMAGE_FILE:
+                // the image content.
+                builder.Append(Build_File(boundary, data_dictionary, "image/png"));
+                break;
+            default:
+                break;
         }
-       
-//  C:\Users\bradl\Pictures\mytext.txt
-// POST / HTTP/1.1
-// Host: localhost:8000
-// Connection: keep-alive
-// Content-Length: 1079
-// Cache-Control: max-age=0
-// sec-ch-ua: "Not?A_Brand";v="8", "Chromium";v="108", "Google Chrome";v="108"
-// sec-ch-ua-mobile: ?0
-// sec-ch-ua-platform: "Windows"
-// Upgrade-Insecure-Requests: 1
-// Origin: http://localhost:8000
-// Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryOuHfNBQciXtH6o6Z
-// User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36
-// Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9
-// Sec-Fetch-Site: same-origin
-// Sec-Fetch-Mode: navigate
-// Sec-Fetch-User: ?1
-// Sec-Fetch-Dest: document
-// Referer: http://localhost:8000/
-// Accept-Encoding: gzip, deflate, br
-// Accept-Language: en-US,en;q=0.9
-
-// ------WebKitFormBoundaryOuHfNBQciXtH6o6Z
-// Content-Disposition: form-data; name="fileName"; filename="mytext.txt"
-// Content-Type: text/plain
-
-// text file testLorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
-// ------WebKitFormBoundaryOuHfNBQciXtH6o6Z
-// Content-Disposition: form-data; name="caption"
-
-// test file
-// ------WebKitFormBoundaryOuHfNBQciXtH6o6Z
-// Content-Disposition: form-data; name="date"
-
-// 2023-01-04
-// ------WebKitFormBoundaryOuHfNBQciXtH6o6Z
-// Content-Disposition: form-data; name="submit"
-
-// Submit
-// ------WebKitFormBoundaryOuHfNBQciXtH6o6Z--
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         return builder.ToString();
     }
 
@@ -241,7 +246,7 @@ class Program
     private static Socket Establish_Connection()
     {
         IPEndPoint endpoint = new IPEndPoint(IPAddress.Parse(HOST_IP), PORT);
-        Socket client       = new Socket(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+        Socket client = new Socket(endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
         client.Connect(endpoint);
         return client;
     }
@@ -249,7 +254,14 @@ class Program
     private static String Welcome_Message()
     {
         StringBuilder builder = new StringBuilder();
-        builder.Append("Welcome To the Program, here are your options:\n");
+        builder.Append("Welcome To File Uploader, here are your options:\n");
+
+        return builder.ToString();
+    }
+
+    private static String Menu_Options()
+    {
+        StringBuilder builder = new StringBuilder();
         builder.Append("1. Upload Photo\n");
         builder.Append("2. Upload File\n");
         builder.Append("3. Messenger Application\n");
@@ -261,40 +273,15 @@ class Program
 
     public static void Main(string[] args)
     {
-        
-       // Socket client = Establish_Connection();
 
-        //Send_Initial_Request(cl);
-        
         bool continue_program = true;
-   
-      //  Console.WriteLine(client.Available);
-        //Console.WriteLine(Welcome_Message());
-        
-        // if (cl.client_socket.Connected)
-        // {
-        //     String message   = "";
-        //     byte[] bytes_rec = new byte[1];
+        Console.WriteLine(Welcome_Message());
 
-        //     while (true)
-        //    {
-        //        if (cl.client_socket.Receive(bytes_rec,1,0) == 0  || Encoding.ASCII.GetString(bytes_rec,0,1) == "\0")
-        //         {
-        //             break;
-        //         }
-        //         message += Encoding.ASCII.GetString(bytes_rec,0,1);
-        //    }
-
-          //  Console.WriteLine(message);
-
-            Console.WriteLine(Welcome_Message());
-
-            while (continue_program)
-            {
-               continue_program = Launch_Application();
-            }
-
-        
+        while (continue_program)
+        {
+            Console.WriteLine(Menu_Options());
+            continue_program = Launch_Application();
+        }
 
     }
 }
